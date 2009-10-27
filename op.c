@@ -2453,6 +2453,7 @@ S_fold_constants(pTHX_ register OP *o)
     OP *old_next;
     SV * const oldwarnhook = PL_warnhook;
     SV * const olddiehook  = PL_diehook;
+    CODESEQ* codeseq;
     COP not_compiling;
     dJMPENV;
 
@@ -2515,6 +2516,9 @@ S_fold_constants(pTHX_ register OP *o)
     o->op_next = 0;
     PL_op = curop;
 
+    codeseq = new_codeseq();
+    compile_op(PL_op, codeseq);
+
     oldscope = PL_scopestack_ix;
     create_eval_scope(G_FAKINGEVAL);
 
@@ -2531,7 +2535,7 @@ S_fold_constants(pTHX_ register OP *o)
 
     switch (ret) {
     case 0:
-	CALLRUNOPS(aTHX);
+	run_exec_codeseq(codeseq);
 	sv = *(PL_stack_sp--);
 	if (o->op_targ && sv == PAD_SV(o->op_targ))	/* grab pad temp? */
 	    pad_swipe(o->op_targ,  FALSE);
@@ -2559,6 +2563,7 @@ S_fold_constants(pTHX_ register OP *o)
     PL_warnhook = oldwarnhook;
     PL_diehook  = olddiehook;
     PL_curcop = &PL_compiling;
+    free_codeseq(codeseq);
 
     if (PL_scopestack_ix > oldscope)
 	delete_eval_scope();
