@@ -1038,7 +1038,7 @@ PP(pp_grepstart)
     if (PL_op->op_type == OP_MAPSTART)
 	pp_pushmark();			/* push top */
     run_set_next_instruction(cLOGOPx(PL_op->op_next)->op_other_instr);
-    return;
+    return NORMAL;
 }
 
 PP(pp_mapwhile)
@@ -1658,6 +1658,7 @@ Perl_die_where(pTHX_ SV *msv)
 		    *msg ? msg : "Unknown error\n");
 	    }
 	    assert(CxTYPE(cx) == CXt_EVAL);
+
 	    run_set_next_instruction( cx->blk_eval.ret_instr );
 	    JMPENV_JUMP(3);
 	    /* NOTREACHED */
@@ -2859,7 +2860,7 @@ S_docatch(pTHX_ const INSTRUCTION *instr)
 {
     dVAR;
     int ret;
-    OP * const old_next_instruction = run_get_next_instruction();
+    const INSTRUCTION * const old_next_instruction = run_get_next_instruction();
     dJMPENV;
 
 #ifdef DEBUGGING
@@ -3938,7 +3939,7 @@ PP(pp_entertry)
 {
     dVAR;
     PERL_CONTEXT * const cx = create_eval_scope(0);
-    cx->blk_eval.ret_instr = cLOGOP->op_other->op_next;
+    cx->blk_eval.ret_instr = cLOGOP->op_other_instr;
     DOCATCH(run_get_next_instruction());
     return;
 }
@@ -4085,7 +4086,7 @@ PP(pp_smartmatch)
 /* This version of do_smartmatch() implements the
  * table of smart matches that is found in perlsyn.
  */
-STATIC OP *
+STATIC OP*
 S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 {
     dVAR;

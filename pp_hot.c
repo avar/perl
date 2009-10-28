@@ -1549,7 +1549,7 @@ ret_no:
     RETPUSHNO;
 }
 
-OP *
+int
 Perl_do_readline(pTHX)
 {
     dVAR; dSP; dTARGETSTACKED;
@@ -2494,7 +2494,8 @@ PP(pp_leavesub)
     PL_curpm = newpm;	/* ... and pop $1 et al */
 
     LEAVESUB(sv);
-    return cx->blk_sub.ret_instr;
+    run_set_next_instruction( cx->blk_sub.ret_instr );
+    RETURN;
 }
 
 /* This duplicates the above code because the above code must not
@@ -2658,7 +2659,8 @@ PP(pp_leavesublv)
     PL_curpm = newpm;	/* ... and pop $1 et al */
 
     LEAVESUB(sv);
-    return cx->blk_sub.ret_instr;
+    run_set_next_instruction( cx->blk_sub.ret_instr );
+    RETURN;
 }
 
 PP(pp_entersub)
