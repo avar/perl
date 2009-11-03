@@ -2121,6 +2121,7 @@ PP(pp_return)
 	    dounwind(0);
 	    PL_stack_base[1] = *PL_stack_sp;
 	    PL_stack_sp = PL_stack_base + 1;
+	    RUN_SET_NEXT_INSTRUCTION(NULL);
 	    return 0;
 	}
 	else
@@ -2137,6 +2138,7 @@ PP(pp_return)
 	    PL_stack_base[1] = *PL_stack_sp;
 	    PL_stack_sp = PL_stack_base + 1;
 	}
+	RUN_SET_NEXT_INSTRUCTION(NULL);
 	return 0;
     }
 
