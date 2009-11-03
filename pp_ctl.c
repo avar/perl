@@ -3827,7 +3827,7 @@ PP(pp_entereval)
 	CODESEQ* codeseq = new_codeseq(); /* FIXME memory leak */
 	compile_op(PL_eval_start, codeseq);
 	DOCATCH(codeseq_start_instruction(codeseq));
-	return;
+	return NORMAL;
     } else {
 	/* We have already left the scope set up earler thanks to the LEAVE
 	   in doeval().  */
@@ -3838,7 +3838,7 @@ PP(pp_entereval)
 	} else {
 	    (void)hv_delete(PL_defstash, tmpbuf, len, G_DISCARD);
 	}
-	RETURN;
+	return NORMAL;
     }
 }
 
