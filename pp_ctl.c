@@ -2892,7 +2892,6 @@ S_docatch(pTHX_ const INSTRUCTION *instr)
 	/* FALL THROUGH */
     default:
 	JMPENV_POP;
-	RUN_SET_NEXT_INSTRUCTION( old_next_instruction );
 	JMPENV_JUMP(ret);
 	/* NOTREACHED */
     }
