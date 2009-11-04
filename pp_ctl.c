@@ -1569,6 +1569,8 @@ Perl_die_where(pTHX_ SV *msv)
 {
     dVAR;
 
+    DEBUG_l(Perl_deb("processing die"));
+
     if (PL_in_eval) {
 	I32 cxix;
 	I32 gimme;
@@ -2588,7 +2590,8 @@ PP(pp_goto)
 		PUTBACK;
 		(void)(*CvXSUB(cv))(aTHX_ cv);
 		LEAVE_with_name("sub");
-		return ret_instr;
+		RUN_SET_NEXT_INSTRUCTION(ret_instr);
+		return NORMAL;
 	    }
 	    else {
 		AV* const padlist = CvPADLIST(cv);
