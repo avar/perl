@@ -997,11 +997,13 @@ PP(pp_grepstart)
 {
     dVAR; dSP;
     SV *src;
+    const int ref_offset = (const int)pparg1; 
 
     if (PL_stack_base + *PL_markstack_ptr == SP) {
 	(void)POPMARK;
 	if (GIMME_V == G_SCALAR)
 	    mXPUSHi(0);
+	RUN_SET_NEXT_INSTRUCTION(run_get_next_instruction() + ref_offset);
 	RETURN;
     }
     PL_stack_sp = PL_stack_base + *PL_markstack_ptr + 1;
@@ -1026,8 +1028,8 @@ PP(pp_grepstart)
 
     PUTBACK;
     if (PL_op->op_type == OP_MAPSTART)
-	pp_pushmark();			/* push top */
-    RUN_SET_NEXT_INSTRUCTION(cLOGOPx(PL_op->op_next)->op_other_instr);
+	pp_pushmark(NULL);			/* push top */
+    /* RUN_SET_NEXT_INSTRUCTION(cLOGOPx(PL_op)->op_other_instr); */
     return NORMAL;
 }
 
@@ -1136,7 +1138,7 @@ PP(pp_mapwhile)
 	else
 	    DEFSV_set(src);
 
-	RUN_SET_NEXT_INSTRUCTION(cLOGOP->op_other_instr);
+	RUN_SET_NEXT_INSTRUCTION(PL_op->op_unstack_instr);
 	RETURN;
     }
 }
@@ -2796,7 +2798,7 @@ PP(pp_goto)
 		 * for each op.  For now, we punt on the hard ones. */
 		if (PL_op->op_type == OP_ENTERITER)
 		    DIE(aTHX_ "Can't \"goto\" into the middle of a foreach loop");
-		CALL_FPTR(PL_ppaddr[PL_op->op_type])(aTHX);
+		CALL_FPTR(PL_ppaddr[PL_op->op_type])(aTHX_ NULL);
 	    }
 	    PL_op = oldop;
 	}
@@ -4085,7 +4087,7 @@ S_matcher_matches_sv(pTHX_ PMOP *matcher, SV *sv)
     PL_op = (OP *) matcher;
     XPUSHs(sv);
     PUTBACK;
-    pp_match();
+    pp_match(NULL);
     SPAGAIN;
     return (SvTRUEx(POPs));
 }
@@ -4567,9 +4569,9 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	PUSHs(d); PUSHs(e);
 	PUTBACK;
 	if (CopHINTS_get(PL_curcop) & HINT_INTEGER)
-	    pp_i_eq();
+	    pp_i_eq(NULL);
 	else
-	    pp_eq();
+	    pp_eq(NULL);
 	SPAGAIN;
 	if (SvTRUEx(POPs))
 	    RETPUSHYES;
@@ -4581,7 +4583,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
     DEBUG_M(Perl_deb(aTHX_ "    applying rule Any-Any\n"));
     PUSHs(d); PUSHs(e);
     PUTBACK;
-    pp_seq();
+    pp_seq(NULL);
     return NORMAL;
 }
 
