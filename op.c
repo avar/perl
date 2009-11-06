@@ -4999,6 +4999,9 @@ whileline, OP *expr, OP *block, OP *cont, I32 has_my)
     /* else */
     /* 	o = listop; */
 
+    if (!expr)
+	expr = newOP(OP_NULL, 0);
+
     if (!loop) {
 	NewOp(1101,loop,1,LOOP);
 	loop->op_type = OP_ENTERLOOP;
@@ -5019,10 +5022,7 @@ whileline, OP *expr, OP *block, OP *cont, I32 has_my)
 
     loop->op_private |= loopflags;
 
-    if (next)
-	loop->op_nextop = next;
-    else
-	loop->op_nextop = loop;
+    loop->op_nextop = next;
 
     loop->op_flags |= flags;
     loop->op_private |= (flags >> 8);
