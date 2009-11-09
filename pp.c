@@ -5941,9 +5941,9 @@ PP(pp_once)
     if (SvPADSTALE(sv)) {
 	/* First time. */
 	SvPADSTALE_off(sv);
-	RUN_SET_NEXT_INSTRUCTION(cLOGOP->op_other_instr);
 	return NORMAL;
     }
+    RUN_SET_NEXT_INSTRUCTION(cLOGOP->op_other_instr);
     return NORMAL;
 }
 
