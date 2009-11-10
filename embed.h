@@ -447,6 +447,9 @@
 #endif
 #define op_refcnt_lock		Perl_op_refcnt_lock
 #define op_refcnt_unlock	Perl_op_refcnt_unlock
+#ifdef PERL_CORE
+#define sequence_op		Perl_sequence_op
+#endif
 #if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define linklist		S_linklist
@@ -2196,6 +2199,7 @@
 #define pp_flip			Perl_pp_flip
 #define pp_flock		Perl_pp_flock
 #define pp_flop			Perl_pp_flop
+#define pp_foreach		Perl_pp_foreach
 #define pp_fork			Perl_pp_fork
 #define pp_formline		Perl_pp_formline
 #define pp_ftatime		Perl_pp_ftatime
@@ -2279,6 +2283,8 @@
 #define pp_i_negate		Perl_pp_i_negate
 #define pp_i_subtract		Perl_pp_i_subtract
 #define pp_index		Perl_pp_index
+#define pp_instr_cond_jump	Perl_pp_instr_cond_jump
+#define pp_instr_jump		Perl_pp_instr_jump
 #define pp_int			Perl_pp_int
 #define pp_ioctl		Perl_pp_ioctl
 #define pp_iter			Perl_pp_iter
@@ -2328,6 +2334,7 @@
 #define pp_next			Perl_pp_next
 #define pp_nextstate		Perl_pp_nextstate
 #define pp_not			Perl_pp_not
+#define pp_nothing		Perl_pp_nothing
 #define pp_null			Perl_pp_null
 #define pp_oct			Perl_pp_oct
 #define pp_once			Perl_pp_once
@@ -2473,6 +2480,7 @@
 #define pp_waitpid		Perl_pp_waitpid
 #define pp_wantarray		Perl_pp_wantarray
 #define pp_warn			Perl_pp_warn
+#define pp_while_and		Perl_pp_while_and
 #define pp_xor			Perl_pp_xor
 
 #else	/* PERL_IMPLICIT_CONTEXT */
@@ -2891,6 +2899,9 @@
 #endif
 #define op_refcnt_lock()	Perl_op_refcnt_lock(aTHX)
 #define op_refcnt_unlock()	Perl_op_refcnt_unlock(aTHX)
+#ifdef PERL_CORE
+#define sequence_op(a)		Perl_sequence_op(aTHX_ a)
+#endif
 #if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define linklist(a)		S_linklist(aTHX_ a)
@@ -4656,6 +4667,7 @@
 #define pp_flip()		Perl_pp_flip(aTHX)
 #define pp_flock()		Perl_pp_flock(aTHX)
 #define pp_flop()		Perl_pp_flop(aTHX)
+#define pp_foreach()		Perl_pp_foreach(aTHX)
 #define pp_fork()		Perl_pp_fork(aTHX)
 #define pp_formline()		Perl_pp_formline(aTHX)
 #define pp_ftatime()		Perl_pp_ftatime(aTHX)
@@ -4739,6 +4751,8 @@
 #define pp_i_negate()		Perl_pp_i_negate(aTHX)
 #define pp_i_subtract()		Perl_pp_i_subtract(aTHX)
 #define pp_index()		Perl_pp_index(aTHX)
+#define pp_instr_cond_jump()	Perl_pp_instr_cond_jump(aTHX)
+#define pp_instr_jump()		Perl_pp_instr_jump(aTHX)
 #define pp_int()		Perl_pp_int(aTHX)
 #define pp_ioctl()		Perl_pp_ioctl(aTHX)
 #define pp_iter()		Perl_pp_iter(aTHX)
@@ -4788,6 +4802,7 @@
 #define pp_next()		Perl_pp_next(aTHX)
 #define pp_nextstate()		Perl_pp_nextstate(aTHX)
 #define pp_not()		Perl_pp_not(aTHX)
+#define pp_nothing()		Perl_pp_nothing(aTHX)
 #define pp_null()		Perl_pp_null(aTHX)
 #define pp_oct()		Perl_pp_oct(aTHX)
 #define pp_once()		Perl_pp_once(aTHX)
@@ -4933,6 +4948,7 @@
 #define pp_waitpid()		Perl_pp_waitpid(aTHX)
 #define pp_wantarray()		Perl_pp_wantarray(aTHX)
 #define pp_warn()		Perl_pp_warn(aTHX)
+#define pp_while_and()		Perl_pp_while_and(aTHX)
 #define pp_xor()		Perl_pp_xor(aTHX)
 
 #endif	/* PERL_IMPLICIT_CONTEXT */
