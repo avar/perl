@@ -912,6 +912,8 @@ Perl_scalar(pTHX_ OP *o)
     case OP_SORT:
 	Perl_ck_warner(aTHX_ packWARN(WARN_VOID), "Useless use of sort in scalar context");
 	break;
+    case OP_ENTERSUB:
+	break;
     }
     return o;
 }
@@ -1407,6 +1409,7 @@ S_finished_op_check(pTHX_ OP* o)
 
     if (! (o->op_context_known
 	    || o->op_type == OP_NULL
+	    || o->op_type == OP_LIST
 	    || o->op_type == OP_NOTHING
 	    || o->op_type == OP_ENTER
 	    || o->op_type == OP_METHOD
@@ -1419,6 +1422,7 @@ S_finished_op_check(pTHX_ OP* o)
 	Perl_op_dump(o);
     assert(o->op_context_known
 	|| o->op_type == OP_NULL
+	|| o->op_type == OP_LIST
 	|| o->op_type == OP_NOTHING
 	|| o->op_type == OP_ENTER
 	|| o->op_type == OP_METHOD
@@ -1504,8 +1508,6 @@ Perl_mod(pTHX_ OP *o, I32 type)
 	       which for a UNOP such as RV2CV is always 1. And w're using
 	       the bit for a flag in RV2CV, so we need it clear.  */
 	    o->op_private &= ~1;
-	    assert(cUNOPo->op_first->op_type == OP_NULL);
-	    op_null(((LISTOP*)cUNOPo->op_first)->op_first);/* disable pushmark */
 	    break;
 	}
 	else if (o->op_private & OPpENTERSUB_NOMOD)
@@ -1523,14 +1525,9 @@ Perl_mod(pTHX_ OP *o, I32 type)
 		CV *cv;
 		OP *okid;
 
-		if (kid->op_type != OP_PUSHMARK) {
-		    if (kid->op_type != OP_NULL || kid->op_targ != OP_LIST)
-			Perl_croak(aTHX_
-				"panic: unexpected lvalue entersub "
-				"args: type/targ %ld:%"UVuf,
-				(long)kid->op_type, (UV)kid->op_targ);
-		    kid = kLISTOP->op_first;
-		}
+		if (kid->op_type == OP_LIST)
+		    kid = kUNOP->op_first;
+
 		while (kid->op_sibling)
 		    kid = kid->op_sibling;
 		if (!(kid->op_type == OP_NULL && kid->op_targ == OP_RV2CV)) {
@@ -1703,7 +1700,10 @@ Perl_mod(pTHX_ OP *o, I32 type)
     case OP_KEYS:
 	if (type != OP_SASSIGN)
 	    goto nomod;
-	goto lvalue_func;
+	pad_free(o->op_targ);
+	o->op_targ = pad_alloc(o->op_type, SVs_PADMY);
+	assert(SvTYPE(PAD_SV(o->op_targ)) == SVt_NULL);
+	break;
     case OP_SUBSTR:
 	if (o->op_private == 4) /* don't allow 4 arg substr as lvalue */
 	    goto nomod;
@@ -1717,7 +1717,7 @@ Perl_mod(pTHX_ OP *o, I32 type)
 	o->op_targ = pad_alloc(o->op_type, SVs_PADMY);
 	assert(SvTYPE(PAD_SV(o->op_targ)) == SVt_NULL);
 	if (o->op_flags & OPf_KIDS)
-	    mod(cBINOPo->op_first->op_sibling, type);
+	    mod(cBINOPo->op_first, type);
 	break;
 
     case OP_AELEM:
@@ -1898,8 +1898,6 @@ Perl_doref(pTHX_ OP *o, I32 type, bool set_op_ref)
 	if ((type == OP_EXISTS || type == OP_DEFINED || type == OP_LOCK) &&
 	    !(o->op_flags & OPf_STACKED)) {
 	    o->op_type = OP_RV2CV;             /* entersub => rv2cv */
-	    assert(cUNOPo->op_first->op_type == OP_NULL);
-	    op_null(((LISTOP*)cUNOPo->op_first)->op_first);	/* disable pushmark */
 	    o->op_flags |= OPf_SPECIAL;
 	    o->op_private &= ~1;
 	}
@@ -2600,8 +2598,8 @@ Perl_convert(pTHX_ I32 type, I32 flags, OP *o)
 	o->op_context_known = 0;
     }
 
-    if (!(PL_opargs[type] & OA_MARK))
-	op_null(cLISTOPo->op_first);
+    /* if (!(PL_opargs[type] & OA_MARK)) */
+    /* 	op_null(cLISTOPo->op_first); */
 
     o->op_type = (OPCODE)type;
     o->op_flags |= flags;
@@ -2691,19 +2689,15 @@ Perl_prepend_elem(pTHX_ I32 type, OP *first, OP *last)
 	return first;
 
     if (last->op_type == (unsigned)type) {
-	if (type == OP_LIST) {	/* already a PUSHMARK there */
-	    first->op_sibling = ((LISTOP*)last)->op_first->op_sibling;
-	    ((LISTOP*)last)->op_first->op_sibling = first;
+	if (!(last->op_flags & OPf_KIDS)) {
+	    ((LISTOP*)last)->op_last = first;
+	    last->op_flags |= OPf_KIDS;
+	}
+	first->op_sibling = ((LISTOP*)last)->op_first;
+	((LISTOP*)last)->op_first = first;
+	if (type == OP_LIST) {
             if (!(first->op_flags & OPf_PARENS))
                 last->op_flags &= ~OPf_PARENS;
-	}
-	else {
-	    if (!(last->op_flags & OPf_KIDS)) {
-		((LISTOP*)last)->op_last = first;
-		last->op_flags |= OPf_KIDS;
-	    }
-	    first->op_sibling = ((LISTOP*)last)->op_first;
-	    ((LISTOP*)last)->op_first = first;
 	}
 	assert((PL_opargs[last->op_type] & OA_CLASS_MASK) >= OA_UNOP);
 	last->op_flags |= OPf_KIDS;
@@ -2973,7 +2967,6 @@ S_force_list(pTHX_ OP *o)
 {
     if (!o || o->op_type != OP_LIST)
 	o = newLISTOP(OP_LIST, 0, o, NULL);
-    op_null(o);
     return o;
 }
 
@@ -3000,14 +2993,14 @@ Perl_newLISTOP(pTHX_ I32 type, I32 flags, OP *first, OP *last)
 	first->op_sibling = last;
     listop->op_first = first;
     listop->op_last = last;
-    if (type == OP_LIST) {
-	OP* const pushop = newOP(OP_PUSHMARK, 0);
-	pushop->op_sibling = first;
-	listop->op_first = pushop;
-	listop->op_flags |= OPf_KIDS;
-	if (!last)
-	    listop->op_last = pushop;
-    }
+    /* if (type == OP_LIST) { */
+    /* 	OP* const pushop = newOP(OP_PUSHMARK, 0); */
+    /* 	pushop->op_sibling = first; */
+    /* 	listop->op_first = pushop; */
+    /* 	listop->op_flags |= OPf_KIDS; */
+    /* 	if (!last) */
+    /* 	    listop->op_last = pushop; */
+    /* } */
 
     return CHECKOP(type, listop);
 }
@@ -3055,7 +3048,7 @@ Perl_newUNOP(pTHX_ I32 type, I32 flags, OP *first)
     if (!first)
 	first = newOP(OP_STUB, 0);
     if (PL_opargs[type] & OA_MARK)
-	first = force_list(first);
+    	first = force_list(first);
 
     NewOp(1101, unop, 1, UNOP);
     unop->op_type = (OPCODE)type;
@@ -3589,12 +3582,12 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
     }
 
     if (isreg && expr->op_type == OP_LIST &&
-	cLISTOPx(expr)->op_first->op_sibling == cLISTOPx(expr)->op_last)
+	cLISTOPx(expr)->op_first == cLISTOPx(expr)->op_last)
     {
 	/* convert single element list to element */
 	OP* const oe = expr;
-	expr = cLISTOPx(oe)->op_first->op_sibling;
-	cLISTOPx(oe)->op_first->op_sibling = NULL;
+	expr = cLISTOPx(oe)->op_first;
+	cLISTOPx(oe)->op_first = NULL;
 	cLISTOPx(oe)->op_last = NULL;
 	op_free(oe);
     }
@@ -4395,8 +4388,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 #endif
 			pm->op_pmflags |= PMf_ONCE;
 			tmpop = cUNOPo->op_first;	/* to list (nulled) */
-			tmpop = ((UNOP*)tmpop)->op_first; /* to pushmark */
-			tmpop->op_sibling = NULL;	/* don't free split */
+			cUNOPx(tmpop)->op_first = NULL;	/* don't free split */
 			op_free(o);			/* blow off assign */
 			right->op_flags &= ~OPf_WANT;
 			right->op_context_known = 0;
@@ -6379,25 +6371,20 @@ Perl_ck_spair(pTHX_ OP *o)
     PERL_ARGS_ASSERT_CK_SPAIR;
 
     if (o->op_flags & OPf_KIDS) {
-	OP* newop;
-	OP* kid;
-	const OPCODE type = o->op_type;
-	o = modkids(ck_fun(o), type);
-	kid = cUNOPo->op_first;
-	newop = kUNOP->op_first->op_sibling;
-	if (newop) {
-	    const OPCODE type = newop->op_type;
-	    if (newop->op_sibling || !(PL_opargs[type] & OA_RETSCALAR) ||
-		    type == OP_PADAV || type == OP_PADHV ||
-		    type == OP_RV2AV || type == OP_RV2HV)
-		return o;
-	}
-#ifdef PERL_MAD
-	op_getmad(kUNOP->op_first,newop,'K');
-#else
-	op_free(kUNOP->op_first);
-#endif
-	kUNOP->op_first = newop;
+    	OP* newop;
+    	OP* kid;
+    	const OPCODE type = o->op_type;
+    	o = modkids(ck_fun(o), type);
+    	kid = cUNOPo->op_first;
+    	newop = kUNOP->op_first;
+    	if (newop) {
+    	    const OPCODE type = newop->op_type;
+    	    if (newop->op_sibling || !(PL_opargs[type] & OA_RETSCALAR) ||
+    		    type == OP_PADAV || type == OP_PADHV ||
+    		    type == OP_RV2AV || type == OP_RV2HV)
+    		return o;
+    	}
+	op_null(kid);
     }
     ++o->op_type;
     return ck_fun(o);
@@ -6557,7 +6544,7 @@ Perl_ck_exec(pTHX_ OP *o)
     if (o->op_flags & OPf_STACKED) {
         OP *kid;
 	o = ck_fun(o);
-	kid = cUNOPo->op_first->op_sibling;
+	kid = cUNOPo->op_first;
 	if (kid->op_type == OP_RV2GV)
 	    op_null(kid);
     }
@@ -7020,7 +7007,10 @@ Perl_ck_fun(pTHX_ OP *o)
 #else
 	/* Ordering of these two is important to keep f_map.t passing.  */
 	op_free(o);
-	return newUNOP(type, 0, newDEFSVOP());
+	if (PL_opargs[type] & OA_LISTOP)
+	    return newLISTOP(type, 0, newDEFSVOP(), NULL);
+	else
+	    return newUNOP(type, 0, newDEFSVOP());
 #endif
     }
 
@@ -7042,7 +7032,7 @@ Perl_ck_glob(pTHX_ OP *o)
     PERL_ARGS_ASSERT_CK_GLOB;
 
     o = ck_fun(o);
-    if ((o->op_flags & OPf_KIDS) && !cLISTOPo->op_first->op_sibling)
+    if (!cLISTOPo->op_first)
 	append_elem(OP_GLOB, o, newDEFSVOP());
 
     if (!((gv = gv_fetchpvs("glob", GV_NOTQUAL, SVt_PVCV))
@@ -7071,8 +7061,6 @@ Perl_ck_glob(pTHX_ OP *o)
 	append_elem(OP_GLOB, o,
 		    newSVOP(OP_CONST, 0, newSViv(PL_glob_index++)));
 	o->op_type = OP_LIST;
-	cLISTOPo->op_first->op_type = OP_PUSHMARK;
-	cLISTOPo->op_first->op_targ = 0;
 	o = newUNOP(OP_ENTERSUB, OPf_STACKED,
 		    append_elem(OP_LIST, o,
 				scalar(newUNOP(OP_RV2CV, 0,
@@ -7108,7 +7096,7 @@ Perl_ck_grep(pTHX_ OP *o)
 	    return no_fh_allowed(o);
 	o->op_flags &= ~OPf_STACKED;
     }
-    kid = cLISTOPo->op_first->op_sibling;
+    kid = cLISTOPo->op_first;
     if (type == OP_MAPWHILE)
 	list(kid);
     else
@@ -7116,7 +7104,7 @@ Perl_ck_grep(pTHX_ OP *o)
     o = ck_fun(o);
     if (PL_parser && PL_parser->error_count)
 	return o;
-    kid = cLISTOPo->op_first->op_sibling;
+    kid = cLISTOPo->op_first;
     if (kid->op_type != OP_NULL)
 	Perl_croak(aTHX_ "panic: ck_grep");
     kid = kUNOP->op_first;
@@ -7131,7 +7119,7 @@ Perl_ck_grep(pTHX_ OP *o)
 	o->op_targ = offset;
     }
 
-    kid = cLISTOPo->op_first->op_sibling;
+    kid = cLISTOPo->op_first;
     if (!kid || !kid->op_sibling)
 	return too_few_arguments(o,OP_DESC(o));
     for (kid = kid->op_sibling; kid; kid = kid->op_sibling)
@@ -7146,7 +7134,7 @@ Perl_ck_index(pTHX_ OP *o)
     PERL_ARGS_ASSERT_CK_INDEX;
 
     if (o->op_flags & OPf_KIDS) {
-	OP *kid = cLISTOPo->op_first->op_sibling;	/* get past pushmark */
+	OP *kid = cLISTOPo->op_first;
 	if (kid)
 	    kid = kid->op_sibling;			/* get past "big" */
 	if (kid && kid->op_type == OP_CONST)
@@ -7244,12 +7232,6 @@ Perl_ck_listiob(pTHX_ OP *o)
     PERL_ARGS_ASSERT_CK_LISTIOB;
 
     kid = cLISTOPo->op_first;
-    if (!kid) {
-	o = force_list(o);
-	kid = cLISTOPo->op_first;
-    }
-    if (kid->op_type == OP_PUSHMARK)
-	kid = kid->op_sibling;
     if (kid && o->op_flags & OPf_STACKED)
 	kid = kid->op_sibling;
     else if (kid && !kid->op_sibling) {		/* print HANDLE; */
@@ -7590,7 +7572,7 @@ Perl_ck_return(pTHX_ OP *o)
 
     PERL_ARGS_ASSERT_CK_RETURN;
 
-    kid = cLISTOPo->op_first->op_sibling;
+    kid = cLISTOPo->op_first;
     if (CvLVALUE(PL_compcv)) {
 	for (; kid; kid = kid->op_sibling)
 	    mod(kid, OP_LEAVESUBLV);
@@ -7626,7 +7608,7 @@ Perl_ck_select(pTHX_ OP *o)
     PERL_ARGS_ASSERT_CK_SELECT;
 
     if (o->op_flags & OPf_KIDS) {
-	kid = cLISTOPo->op_first->op_sibling;	/* get past pushmark */
+	kid = cLISTOPo->op_first;
 	if (kid && kid->op_sibling) {
 	    o->op_type = OP_SSELECT;
 	    o = ck_fun(o);
@@ -7634,7 +7616,7 @@ Perl_ck_select(pTHX_ OP *o)
 	}
     }
     o = ck_fun(o);
-    kid = cLISTOPo->op_first->op_sibling;    /* get past pushmark */
+    kid = cLISTOPo->op_first;
     if (kid && kid->op_type == OP_RV2GV)
 	kid->op_private &= ~HINT_STRICT_REFS;
     return o;
@@ -7688,7 +7670,7 @@ Perl_ck_sort(pTHX_ OP *o)
 
     if (o->op_type == OP_SORT && o->op_flags & OPf_STACKED)
 	simplify_sort(o);
-    firstkid = cLISTOPo->op_first->op_sibling;		/* get past pushmark */
+    firstkid = cLISTOPo->op_first;
     if (o->op_flags & OPf_STACKED) {			/* may have been cleared */
 	OP *k = NULL;
 	OP *kid = cUNOPx(firstkid)->op_first;		/* get past null */
@@ -7718,7 +7700,7 @@ STATIC void
 S_simplify_sort(pTHX_ OP *o)
 {
     dVAR;
-    register OP *kid = cLISTOPo->op_first->op_sibling;	/* get past pushmark */
+    register OP *kid = cLISTOPo->op_first;
     OP *k;
     int descending;
     GV *gv;
@@ -7782,8 +7764,8 @@ S_simplify_sort(pTHX_ OP *o)
 	o->op_private |= OPpSORT_NUMERIC;
     if (k->op_type == OP_I_NCMP)
 	o->op_private |= OPpSORT_NUMERIC | OPpSORT_INTEGER;
-    kid = cLISTOPo->op_first->op_sibling;
-    cLISTOPo->op_first->op_sibling = kid->op_sibling; /* bypass old block */
+    kid = cLISTOPo->op_first;
+    cLISTOPo->op_first = kid->op_sibling; /* bypass old block */
 #ifdef PERL_MAD
     op_getmad(kid,o,'S');			      /* then delete it */
 #else
@@ -7803,11 +7785,6 @@ Perl_ck_split(pTHX_ OP *o)
 	return no_fh_allowed(o);
 
     kid = cLISTOPo->op_first;
-    if (kid->op_type != OP_NULL)
-	Perl_croak(aTHX_ "panic: ck_split");
-    kid = kid->op_sibling;
-    op_free(cLISTOPo->op_first);
-    cLISTOPo->op_first = kid;
     if (!kid) {
 	cLISTOPo->op_first = kid = newSVOP(OP_CONST, 0, newSVpvs(" "));
 	cLISTOPo->op_last = kid; /* There was only one element previously */
@@ -7873,9 +7850,10 @@ OP *
 Perl_ck_subr(pTHX_ OP *o)
 {
     dVAR;
-    OP *prev = ((cUNOPo->op_first->op_sibling)
-	     ? cUNOPo : ((UNOP*)cUNOPo->op_first))->op_first;
-    OP *o2 = prev->op_sibling;
+    UNOP *oroot = ((cUNOPo->op_first->op_sibling)
+	? cUNOPo : ((UNOP*)cUNOPo->op_first));
+    OP *o2 = oroot->op_first;
+    OP *prev = NULL;
     OP *cvop;
     const char *proto = NULL;
     const char *proto_end = NULL;
@@ -8003,7 +7981,10 @@ Perl_ck_subr(pTHX_ OP *o)
 				gv_fullname4(n, gv, "", FALSE);
 				o2 = newSVOP(OP_CONST, 0, n);
 				op_getmad(oldo2,o2,'O');
-				prev->op_sibling = o2;
+				if (prev)
+				    prev->op_sibling = o2;
+				else
+				    oroot->op_first = o2;
 				o2->op_sibling = sibling;
 			    }
 			}
@@ -8084,7 +8065,10 @@ Perl_ck_subr(pTHX_ OP *o)
 			kid->op_sibling = 0;
 			o2 = newUNOP(OP_REFGEN, 0, kid);
 			o2->op_sibling = sib;
-			prev->op_sibling = o2;
+			if (prev)
+			    prev->op_sibling = o2;
+			else
+			    oroot->op_first = o2;
 		    }
 		    if (contextclass && e) {
 			 proto = e + 1;
@@ -8114,8 +8098,14 @@ Perl_ck_subr(pTHX_ OP *o)
     if (o2 == cvop && proto && *proto == '_') {
 	/* generate an access to $_ */
 	o2 = newDEFSVOP();
-	o2->op_sibling = prev->op_sibling;
-	prev->op_sibling = o2; /* instead of cvop */
+	if (prev) {
+	    o2->op_sibling = prev->op_sibling;
+	    prev->op_sibling = o2; /* instead of cvop */
+	}
+	else {
+	    o2->op_sibling = oroot->op_first;
+	    oroot->op_first = o2;
+	}
     }
     if (proto && !optional && proto_end > proto &&
 	(*proto != '@' && *proto != '%' && *proto != ';' && *proto != '_'))
@@ -8184,8 +8174,7 @@ Perl_ck_unpack(pTHX_ OP *o)
 
     PERL_ARGS_ASSERT_CK_UNPACK;
 
-    if (kid->op_sibling) {
-	kid = kid->op_sibling;
+    if (kid) {
 	if (!kid->op_sibling)
 	    kid->op_sibling = newDEFSVOP();
     }
@@ -8201,8 +8190,6 @@ Perl_ck_substr(pTHX_ OP *o)
     if ((o->op_flags & OPf_KIDS) && (o->op_private == 4)) {
 	OP *kid = cLISTOPo->op_first;
 
-	if (kid->op_type == OP_NULL)
-	    kid = kid->op_sibling;
 	if (kid)
 	    kid->op_flags |= OPf_MOD;
 
@@ -8671,8 +8658,7 @@ Perl_peep(pTHX_ register OP *o)
 	    SVOP *first_key_op, *key_op;
 
 	    if ((o->op_private & (OPpLVAL_INTRO))
-		/* I bet there's always a pushmark... */
-		|| ((LISTOP*)o)->op_first->op_sibling->op_type != OP_LIST)
+		|| ((LISTOP*)o)->op_first->op_type != OP_LIST)
 		/* hmmm, no optimization if list contains only one key. */
 		break;
 	    rop = (UNOP*)((LISTOP*)o)->op_last;
@@ -8698,9 +8684,8 @@ Perl_peep(pTHX_ register OP *o)
 	    fields = (GV**)hv_fetchs(SvSTASH(lexname), "FIELDS", FALSE);
 	    if (!fields || !GvHV(*fields))
 		break;
-	    /* Again guessing that the pushmark can be jumped over.... */
-	    first_key_op = (SVOP*)((LISTOP*)((LISTOP*)o)->op_first->op_sibling)
-		->op_first->op_sibling;
+	    first_key_op = (SVOP*)((LISTOP*)((LISTOP*)o)->op_first)
+		->op_first;
 	    for (key_op = first_key_op; key_op;
 		 key_op = (SVOP*)key_op->op_sibling) {
 		if (key_op->op_type != OP_CONST)
