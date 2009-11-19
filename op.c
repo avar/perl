@@ -1125,7 +1125,6 @@ Perl_scalarvoid(pTHX_ OP *o)
 		}
 	    }
 	}
-	op_null(o);		/* don't execute or even remember it */
 	break;
 
     case OP_POSTINC:
