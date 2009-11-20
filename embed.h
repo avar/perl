@@ -2057,6 +2057,7 @@
 #if defined(PERL_IN_COMPILE_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define is_inplace_av		S_is_inplace_av
+#define sv_const_instruction	S_sv_const_instruction
 #endif
 #endif
 #ifdef PERL_CORE
@@ -4536,6 +4537,7 @@
 #if defined(PERL_IN_COMPILE_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define is_inplace_av(a)	S_is_inplace_av(aTHX_ a)
+#define sv_const_instruction(a,b,c)	S_sv_const_instruction(aTHX_ a,b,c)
 #endif
 #endif
 #ifdef PERL_CORE
