@@ -2059,7 +2059,7 @@
 #endif
 #if defined(PERL_IN_COMPILE_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
-#define is_inplace_sort_av	S_is_inplace_sort_av
+#define is_inplace_av		S_is_inplace_av
 #endif
 #endif
 #ifdef PERL_CORE
@@ -4540,7 +4540,7 @@
 #endif
 #if defined(PERL_IN_COMPILE_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
-#define is_inplace_sort_av(a)	S_is_inplace_sort_av(aTHX_ a)
+#define is_inplace_av(a)	S_is_inplace_av(aTHX_ a)
 #endif
 #endif
 #ifdef PERL_CORE
