@@ -1227,6 +1227,7 @@ Perl_scalarvoid(pTHX_ OP *o)
     case OP_LIST:
     case OP_LEAVEGIVEN:
     case OP_LEAVEWHEN:
+    case OP_LEAVEEVAL:
 	for (kid = cLISTOPo->op_first; kid; kid = kid->op_sibling)
 	    scalarvoid(kid);
 	break;
@@ -1237,9 +1238,6 @@ Perl_scalarvoid(pTHX_ OP *o)
     case OP_FOREACH:
 	for (kid = cLISTOPo->op_first->op_sibling->op_sibling; kid; kid = kid->op_sibling)
 	    scalarvoid(kid);
-	break;
-    case OP_LEAVEEVAL:
-	scalarkids(o);
 	break;
     case OP_SCALAR:
 	return scalar(o);
