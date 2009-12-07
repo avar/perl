@@ -3431,7 +3431,7 @@ struct nexttoken {
 #include "cv.h"
 #include "opnames.h"
 #include "op.h"
-#include "compile.h"
+#include "instruction.h"
 #include "hv.h"
 #include "cop.h"
 #include "av.h"
