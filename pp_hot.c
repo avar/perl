@@ -2141,10 +2141,10 @@ PP(pp_subst)
     bool is_cow;
 #endif
     SV *nsv = NULL;
+    INSTRUCTION* pmreplroot_instr = (INSTRUCTION*)pparg1;
 
     /* known replacement string? */
     register SV *dstr = (pm->op_pmflags & PMf_CONST) ? POPs : NULL;
-    PERL_UNUSED_VAR(pparg1);
     if (PL_op->op_flags & OPf_STACKED)
 	TARG = POPs;
     else if (PL_op->op_private & OPpTARGET_MY)
@@ -2377,7 +2377,7 @@ PP(pp_subst)
 	    register PERL_CONTEXT *cx;
 	    SPAGAIN;
 	    PUSHSUBST(cx);
-	    RUN_SET_NEXT_INSTRUCTION(cPMOP->op_pmreplroot_instr);
+	    RUN_SET_NEXT_INSTRUCTION(pmreplroot_instr);
 	    RETURN;
 	}
 	r_flags |= REXEC_IGNOREPOS | REXEC_NOT_FIRST;
