@@ -4740,7 +4740,6 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
     logop->op_type = (OPCODE)type;
     logop->op_first = first;
     logop->op_flags = (U8)(flags | OPf_KIDS);
-    logop->op_other_instr = NULL;
     logop->op_private = (U8)(1 | (flags >> 8));
 
     first->op_sibling = other;
@@ -7356,7 +7355,6 @@ Perl_ck_sassign(pTHX_ OP *o)
 	    condop->op_type = OP_ONCE;
 	    condop->op_first = o;
 	    condop->op_flags = OPf_KIDS;
-	    condop->op_other_instr = NULL;
 	    condop->op_private = 1;
 
 	    o->op_sibling = other;
