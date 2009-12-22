@@ -1578,7 +1578,7 @@ Perl_die_where(pTHX_ SV *msv)
 {
     dVAR;
 
-    DEBUG_l(Perl_deb("processing die"));
+    DEBUG_l(Perl_deb(aTHX_ "processing die"));
 
     if (PL_in_eval) {
 	I32 cxix;
@@ -2772,7 +2772,7 @@ PP(pp_goto)
 		break;
 	    }
 	    if (gotoprobe) {
-		ret_instr = S_dofindinstruction(
+		ret_instr = S_dofindinstruction(aTHX_ 
 		    dofindlabel(gotoprobe, label,
 			enterops, enterops + GOTO_DEPTH)
 		    );
