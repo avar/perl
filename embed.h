@@ -2059,6 +2059,7 @@
 #define save_branch_point	S_save_branch_point
 #define save_instr_from_to_pparg	S_save_instr_from_to_pparg
 #define instr_fold_constants	S_instr_fold_constants
+#define append_allocated_data	S_append_allocated_data
 #endif
 #endif
 #ifdef PERL_CORE
@@ -4548,6 +4549,7 @@
 #define save_branch_point(a,b)	S_save_branch_point(aTHX_ a,b)
 #define save_instr_from_to_pparg(a,b,c)	S_save_instr_from_to_pparg(aTHX_ a,b,c)
 #define instr_fold_constants(a,b,c)	S_instr_fold_constants(aTHX_ a,b,c)
+#define append_allocated_data(a,b)	S_append_allocated_data(aTHX_ a,b)
 #endif
 #endif
 #ifdef PERL_CORE
