@@ -1168,7 +1168,7 @@ PP(pp_flip)
 {
     dVAR;
     dSP;
-    PERL_UNUSED_ARG(pparg1);
+    const INSTRUCTION const *end_instr = (const INSTRUCTION const *)pparg1;
 
     if (GIMME == G_ARRAY) {
 	RETURN;
@@ -1195,7 +1195,7 @@ PP(pp_flip)
 	    if (PL_op->op_flags & OPf_SPECIAL) {
 		sv_setiv(targ, 1);
 		SETs(targ);
-		RUN_SET_NEXT_INSTRUCTION(cLOGOP->op_first->op_unstack_instr);
+		RUN_SET_NEXT_INSTRUCTION(end_instr);
 		RETURN;
 	    }
 	    else {
@@ -1206,7 +1206,7 @@ PP(pp_flip)
 	}
 	sv_setpvs(TARG, "");
 	SETs(targ);
-	RUN_SET_NEXT_INSTRUCTION(cLOGOP->op_first->op_unstack_instr);
+	RUN_SET_NEXT_INSTRUCTION(end_instr);
 	RETURN;
     }
 }
