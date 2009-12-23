@@ -5316,12 +5316,14 @@ Perl_cv_undef(pTHX_ CV *cv)
     CvFILE(cv) = NULL;
 #endif
 
-    codeseq_refcnt_dec(CvCODESEQ(cv));
-
     if (!CvISXSUB(cv) && CvROOT(cv)) {
 	if (SvTYPE(cv) == SVt_PVCV && CvDEPTH(cv))
 	    Perl_croak(aTHX_ "Can't undef active subroutine");
+
 	ENTER;
+
+	codeseq_refcnt_dec(CvCODESEQ(cv));
+	CvCODESEQ(cv) = NULL;
 
 	PAD_SAVE_SETNULLPAD();
 
@@ -5333,8 +5335,6 @@ Perl_cv_undef(pTHX_ CV *cv)
     CvGV(cv) = NULL;
 
     pad_undef(cv);
-
-    CvCODESEQ(cv) = NULL;
 
     /* remove CvOUTSIDE unless this is an undef rather than a free */
     if (!SvREFCNT(cv) && CvOUTSIDE(cv)) {
