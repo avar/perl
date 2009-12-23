@@ -11285,6 +11285,7 @@ Perl_sv_dup(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 		    CvWEAKOUTSIDE(sstr)
 		    ? cv_dup(    CvOUTSIDE(dstr), param)
 		    : cv_dup_inc(CvOUTSIDE(dstr), param);
+		CvCODESEQ(dstr) = NULL;
 		if (!CvISXSUB(dstr))
 		    CvFILE(dstr) = SAVEPV(CvFILE(dstr));
 		break;
