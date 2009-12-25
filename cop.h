@@ -134,6 +134,15 @@ typedef struct jmpenv JMPENV;
 #define CATCH_GET		(PL_top_env->je_mustcatch)
 #define CATCH_SET(v)		(PL_top_env->je_mustcatch = (v))
 
+#define RUN_SET_NEXT_INSTRUCTION(instr)		\
+    STMT_START {							\
+	DEBUG_t(PerlIO_printf(Perl_debug_log,				\
+		"Instruction jump to 0x%p %s, was 0x%p %s at %s:%d\n",	\
+		(void*)instr, instruction_name(instr),			\
+		(void*)PL_run_next_instruction, instruction_name(PL_run_next_instruction), \
+		__FILE__, __LINE__));					\
+	run_set_next_instruction(instr);				\
+    } STMT_END								\
 
 #include "mydtrace.h"
 
@@ -425,7 +434,15 @@ struct block_eval {
 	    sv_2mortal(cx->blk_eval.old_namesv);			\
     } STMT_END
 
+
 /* loop context */
+
+struct loop_instructions {
+    INSTRUCTION* next_instr;
+    INSTRUCTION* last_instr;
+    INSTRUCTION* redo_instr;
+};
+
 struct block_loop {
     I32		resetsp;
     LOOP *	my_op;	/* My op, that contains redo, next and last ops.  */
@@ -602,6 +619,12 @@ struct block {
 	DEBUG_SCOPE("TOPBLOCK");
 
 /* substitution context */
+
+struct substcont_instructions {
+    INSTRUCTION* pmreplstart_instr;
+    INSTRUCTION* subst_next_instr;
+};
+
 struct subst {
     U8		sbu_type;	/* what kind of context this is */
     U8		sbu_rflags;
