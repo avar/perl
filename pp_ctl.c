@@ -47,7 +47,8 @@ PP(pp_wantarray)
     dVAR;
     dSP;
     I32 cxix;
-    PERL_UNUSED_ARG(pparg1);
+    PERL_UNUSED_ARG(pparg);
+    PERL_UNUSED_ARG(ppflags);
     EXTEND(SP, 1);
 
     cxix = dopoptosub(cxstack_ix);
@@ -67,7 +68,8 @@ PP(pp_wantarray)
 PP(pp_regcreset)
 {
     dVAR;
-    PERL_UNUSED_ARG(pparg1);
+    PERL_UNUSED_ARG(pparg);
+    PERL_UNUSED_ARG(ppflags);
     /* XXXX Should store the old value to allow for tie/overload - and
        restore in regcomp, where marked with XXXX. */
     PL_reginterp_cnt = 0;
@@ -82,7 +84,8 @@ PP(pp_regcomp)
     register PMOP *pm = (PMOP*)cLOGOP->op_other;
     SV *tmpstr;
     REGEXP *re = NULL;
-    PERL_UNUSED_ARG(pparg1);
+    PERL_UNUSED_ARG(pparg);
+    PERL_UNUSED_ARG(ppflags);
 
     /* prevent recompiling under /o and ithreads. */
     if (pm->op_pmflags & PMf_KEEP && PM_GETRE(pm)) {
@@ -257,7 +260,8 @@ PP(pp_substcont)
     register REGEXP * const rx = cx->sb_rx;
     SV *nsv = NULL;
     REGEXP *old = PM_GETRE(pm);
-    SUBSTCONT_INSTRUCTIONS *substcont_instrs = (SUBSTCONT_INSTRUCTIONS*)pparg1;
+    SUBSTCONT_INSTRUCTIONS *substcont_instrs = (SUBSTCONT_INSTRUCTIONS*)pparg;
+    PERL_UNUSED_ARG(ppflags);
 
     if(old != rx) {
 	if(old)
@@ -487,8 +491,9 @@ PP(pp_formline)
     bool targ_is_utf8 = FALSE;
     SV * nsv = NULL;
     const char *fmt;
-    const INSTRUCTION const * restart_instr = (const INSTRUCTION const *)pparg1;
-
+    const INSTRUCTION const * restart_instr = (const INSTRUCTION const *)pparg;
+    PERL_UNUSED_ARG(ppflags);
+    
     if (!SvMAGICAL(tmpForm) || !SvCOMPILED(tmpForm)) {
 	if (SvREADONLY(tmpForm)) {
 	    SvREADONLY_off(tmpForm);
@@ -1003,7 +1008,8 @@ PP(pp_grepstart)
 {
     dVAR; dSP;
     SV *src;
-    const INSTRUCTION* cont_instruction = (const INSTRUCTION*)pparg1; 
+    const INSTRUCTION* cont_instruction = (const INSTRUCTION*)pparg; 
+    PERL_UNUSED_ARG(ppflags);
 
     if (PL_stack_base + *PL_markstack_ptr == SP) {
 	(void)POPMARK;
@@ -1013,8 +1019,8 @@ PP(pp_grepstart)
 	RETURN;
     }
     PL_stack_sp = PL_stack_base + *PL_markstack_ptr + 1;
-    pp_pushmark(NULL, NULL);				/* push dst */
-    pp_pushmark(NULL, NULL);				/* push src */
+    pp_pushmark(0, NULL);				/* push dst */
+    pp_pushmark(0, NULL);				/* push src */
     ENTER_with_name("grep");					/* enter outer scope */
 
     SAVETMPS;
@@ -1034,7 +1040,7 @@ PP(pp_grepstart)
 
     PUTBACK;
     if (PL_op->op_type == OP_MAPSTART)
-	pp_pushmark(NULL, NULL);			/* push top */
+	pp_pushmark(0, NULL);			/* push top */
     /* RUN_SET_NEXT_INSTRUCTION(cLOGOPx(PL_op)->op_other_instr); */
     return NORMAL;
 }
@@ -1048,7 +1054,8 @@ PP(pp_mapwhile)
     I32 shift;
     SV** src;
     SV** dst;
-    const INSTRUCTION const *map_item_instr = (const INSTRUCTION const *)pparg1;
+    const INSTRUCTION const *map_item_instr = (const INSTRUCTION const *)pparg;
+    PERL_UNUSED_ARG(ppflags);
 
     /* first, move source pointer to the next item in the source list */
     ++PL_markstack_ptr[-1];
@@ -1155,7 +1162,8 @@ PP(pp_mapwhile)
 PP(pp_range)
 {
     dVAR;
-    const INSTRUCTION const *flop_instr = (const INSTRUCTION const *)pparg1;
+    const INSTRUCTION const *flop_instr = (const INSTRUCTION const *)pparg;
+    PERL_UNUSED_ARG(ppflags);
     if (GIMME == G_ARRAY)
 	return NORMAL;
     if (SvTRUEx(PAD_SV(PL_op->op_targ))) {
@@ -1169,7 +1177,8 @@ PP(pp_flip)
 {
     dVAR;
     dSP;
-    const INSTRUCTION const *end_instr = (const INSTRUCTION const *)pparg1;
+    const INSTRUCTION const *end_instr = (const INSTRUCTION const *)pparg;
+    PERL_UNUSED_ARG(ppflags);
 
     if (GIMME == G_ARRAY) {
 	RETURN;
@@ -1226,7 +1235,8 @@ PP(pp_flip)
 PP(pp_flop)
 {
     dVAR; dSP;
-    PERL_UNUSED_ARG(pparg1);
+    PERL_UNUSED_ARG(pparg);
+    PERL_UNUSED_ARG(ppflags);
 
     if (GIMME == G_ARRAY) {
 	dPOPPOPssrl;
@@ -1680,7 +1690,8 @@ Perl_die_where(pTHX_ SV *msv)
 PP(pp_xor)
 {
     dVAR; dSP; dPOPTOPssrl;
-    PERL_UNUSED_ARG(pparg1);
+    PERL_UNUSED_ARG(pparg);
+    PERL_UNUSED_ARG(ppflags);
     if (SvTRUE(left) != SvTRUE(right))
 	RETSETYES;
     else
@@ -1698,7 +1709,8 @@ PP(pp_caller)
     I32 gimme;
     const char *stashname;
     I32 count = 0;
-    PERL_UNUSED_ARG(pparg1);
+    PERL_UNUSED_ARG(pparg);
+    PERL_UNUSED_ARG(ppflags);
 
     if (MAXARG)
 	count = POPi;
@@ -1862,7 +1874,8 @@ PP(pp_reset)
     dVAR;
     dSP;
     const char * const tmps = (MAXARG < 1) ? (const char *)"" : POPpconstx;
-    PERL_UNUSED_ARG(pparg1);
+    PERL_UNUSED_ARG(pparg);
+    PERL_UNUSED_ARG(ppflags);
     sv_reset(tmps, CopSTASH(PL_curcop));
     PUSHs(&PL_sv_yes);
     RETURN;
@@ -1873,7 +1886,8 @@ PP(pp_reset)
 PP(pp_dbstate)
 {
     dVAR;
-    PERL_UNUSED_ARG(pparg1);
+    PERL_UNUSED_ARG(pparg);
+    PERL_UNUSED_ARG(ppflags);
     PL_curcop = (COP*)PL_op;
     TAINT_NOT;		/* Each statement is presumed innocent */
     PL_stack_sp = PL_stack_base + cxstack[cxstack_ix].blk_oldsp;
@@ -1943,7 +1957,8 @@ PP(pp_enteriter)
 #ifdef USE_ITHREADS
     PAD *iterdata;
 #endif
-    const LOOP_INSTRUCTIONS* loop_instrs = (const LOOP_INSTRUCTIONS*)pparg1;
+    const LOOP_INSTRUCTIONS* loop_instrs = (const LOOP_INSTRUCTIONS*)pparg;
+    PERL_UNUSED_ARG(ppflags);
 
     ENTER_with_name("loop1");
     SAVETMPS;
@@ -2070,7 +2085,8 @@ PP(pp_enterloop)
     dVAR; dSP;
     register PERL_CONTEXT *cx;
     const I32 gimme = GIMME_V;
-    const LOOP_INSTRUCTIONS* loop_instrs = (const LOOP_INSTRUCTIONS*)pparg1;
+    const LOOP_INSTRUCTIONS* loop_instrs = (const LOOP_INSTRUCTIONS*)pparg;
+    PERL_UNUSED_ARG(ppflags);
 
     ENTER_with_name("loop1");
     SAVETMPS;
@@ -2090,7 +2106,8 @@ PP(pp_leaveloop)
     SV **newsp;
     PMOP *newpm;
     SV **mark;
-    PERL_UNUSED_ARG(pparg1);
+    PERL_UNUSED_ARG(pparg);
+    PERL_UNUSED_ARG(ppflags);
 
     POPBLOCK_normal(cx,newpm);
     assert(CxTYPE_is_LOOP(cx));
@@ -2138,7 +2155,8 @@ PP(pp_return)
     const INSTRUCTION *ret_instr = NULL;
 
     const I32 cxix = dopoptosub(cxstack_ix);
-    PERL_UNUSED_ARG(pparg1);
+    PERL_UNUSED_ARG(pparg);
+    PERL_UNUSED_ARG(ppflags);
 
     if (cxix < 0) {
 	if (CxMULTICALL(cxstack)) { /* In this case we must be in a
@@ -2266,7 +2284,8 @@ PP(pp_last)
     PMOP *newpm;
     SV **mark;
     SV *sv = NULL;
-    PERL_UNUSED_ARG(pparg1);
+    PERL_UNUSED_ARG(pparg);
+    PERL_UNUSED_ARG(ppflags);
 
 
     if (PL_op->op_flags & OPf_SPECIAL) {
@@ -2358,7 +2377,8 @@ PP(pp_next)
     I32 cxix;
     register PERL_CONTEXT *cx;
     I32 inner;
-    PERL_UNUSED_ARG(pparg1);
+    PERL_UNUSED_ARG(pparg);
+    PERL_UNUSED_ARG(ppflags);
 
     if (PL_op->op_flags & OPf_SPECIAL) {
 	cxix = dopoptoloop(cxstack_ix);
@@ -2390,8 +2410,9 @@ PP(pp_redo)
     I32 cxix;
     register PERL_CONTEXT *cx;
     I32 oldsave;
-    INSTRUCTION* redo_instr;
-    PERL_UNUSED_ARG(pparg1);
+    const INSTRUCTION* redo_instr;
+    PERL_UNUSED_ARG(pparg);
+    PERL_UNUSED_ARG(ppflags);
 
     if (PL_op->op_flags & OPf_SPECIAL) {
 	cxix = dopoptoloop(cxstack_ix);
@@ -2515,7 +2536,8 @@ PP(pp_goto)
     const char *label = NULL;
     const bool do_dump = (PL_op->op_type == OP_DUMP);
     static const char must_have_label[] = "goto must have label";
-    PERL_UNUSED_ARG(pparg1);
+    PERL_UNUSED_ARG(pparg);
+    PERL_UNUSED_ARG(ppflags);
 
     if (PL_op->op_flags & OPf_STACKED) {
 	SV * const sv = POPs;
@@ -2826,7 +2848,7 @@ PP(pp_goto)
 		 * for each op.  For now, we punt on the hard ones. */
 		if (PL_op->op_type == OP_FOREACH)
 		    DIE(aTHX_ "Can't \"goto\" into the middle of a foreach loop");
-		CALL_FPTR(PL_ppaddr[PL_op->op_type])(aTHX_ NULL, NULL);
+		CALL_FPTR(PL_ppaddr[PL_op->op_type])(aTHX_ 0, NULL);
 	    }
 	    PL_op = oldop;
 	}
@@ -2836,7 +2858,6 @@ PP(pp_goto)
 #ifdef VMS
 	if (!ret_instr) retop = PL_main_start;
 #endif
-	PL_restartop = ret_instr;
 	PL_do_undump = TRUE;
 
 	my_unexec();
@@ -2854,7 +2875,8 @@ PP(pp_exit)
     dVAR;
     dSP;
     I32 anum;
-    PERL_UNUSED_ARG(pparg1);
+    PERL_UNUSED_ARG(pparg);
+    PERL_UNUSED_ARG(ppflags);
 
     if (MAXARG < 1)
 	anum = 0;
@@ -3340,8 +3362,8 @@ PP(pp_require)
     SV *filter_sub = NULL;
     SV *hook_sv = NULL;
     SV *encoding;
-    OP *op;
-    PERL_UNUSED_ARG(pparg1);
+    PERL_UNUSED_ARG(pparg);
+    PERL_UNUSED_ARG(ppflags);
 
     sv = POPs;
     if ( (SvNIOKp(sv) || SvVOK(sv)) && PL_op->op_type != OP_DOFILE) {
@@ -3774,7 +3796,8 @@ PP(pp_hintseval)
 {
     dVAR;
     dSP;
-    PERL_UNUSED_ARG(pparg1);
+    PERL_UNUSED_ARG(pparg);
+    PERL_UNUSED_ARG(ppflags);
     mXPUSHs(MUTABLE_SV(Perl_hv_copy_hints_hv(aTHX_ MUTABLE_HV(cSVOP_sv))));
     RETURN;
 }
@@ -3793,7 +3816,8 @@ PP(pp_entereval)
     CV* runcv;
     U32 seq;
     HV *saved_hh = NULL;
-    PERL_UNUSED_ARG(pparg1);
+    PERL_UNUSED_ARG(pparg);
+    PERL_UNUSED_ARG(ppflags);
 
     if (PL_op->op_private & OPpEVAL_HAS_HH) {
 	saved_hh = MUTABLE_HV(SvREFCNT_inc(POPs));
@@ -3864,6 +3888,7 @@ PP(pp_entereval)
     PUTBACK;
 
     if (doeval(gimme, NULL, runcv, seq)) {
+	CODESEQ* codeseq;
 	if (was != PL_breakable_sub_gen /* Some subs defined here. */
 	    ? (PERLDB_LINE || PERLDB_SAVESRC)
 	    :  PERLDB_SAVESRC_NOSUBS) {
@@ -3872,7 +3897,7 @@ PP(pp_entereval)
 	    char *const safestr = savepvn(tmpbuf, len);
 	    SAVEDELETE(PL_defstash, safestr, len);
 	}
-	CODESEQ* codeseq = new_codeseq();
+	codeseq = new_codeseq();
 	save_freecodeseq(codeseq);
 	compile_op(PL_eval_root, codeseq);
 	DOCATCH(codeseq_start_instruction(codeseq));
@@ -3902,7 +3927,8 @@ PP(pp_leaveeval)
     const INSTRUCTION *ret_instr;
     const U8 save_flags = PL_op -> op_flags;
     I32 optype;
-    PERL_UNUSED_ARG(pparg1);
+    PERL_UNUSED_ARG(pparg);
+    PERL_UNUSED_ARG(ppflags);
 
     POPBLOCK_normal(cx,newpm);
     POPEVAL(cx);
@@ -4010,7 +4036,8 @@ PP(pp_entertry)
 {
     dVAR;
     PERL_CONTEXT * const cx = create_eval_scope(0);
-    const INSTRUCTION const * other_instr = (const INSTRUCTION const*)pparg1;
+    const INSTRUCTION const * other_instr = (const INSTRUCTION const*)pparg;
+    PERL_UNUSED_VAR(ppflags);
     cx->blk_eval.ret_instr = other_instr;
     assert(cx->blk_eval.ret_instr);
     DOCATCH(run_get_next_instruction());
@@ -4025,7 +4052,8 @@ PP(pp_leavetry)
     I32 gimme;
     register PERL_CONTEXT *cx;
     I32 optype;
-    PERL_UNUSED_ARG(pparg1);
+    PERL_UNUSED_ARG(pparg);
+    PERL_UNUSED_ARG(ppflags);
 
     POPBLOCK_normal(cx,newpm);
     POPEVAL(cx);
@@ -4071,7 +4099,8 @@ PP(pp_entergiven)
     dVAR; dSP;
     register PERL_CONTEXT *cx;
     const I32 gimme = GIMME_V;
-    const INSTRUCTION const * leave_instr = (const INSTRUCTION const*) pparg1;
+    const INSTRUCTION const * leave_instr = (const INSTRUCTION const*) pparg;
+    PERL_UNUSED_VAR(ppflags);
     
     ENTER_with_name("given");
     SAVETMPS;
@@ -4092,7 +4121,8 @@ PP(pp_leavegiven)
     SV **newsp;
     PMOP *newpm;
     PERL_UNUSED_CONTEXT;
-    PERL_UNUSED_ARG(pparg1);
+    PERL_UNUSED_ARG(pparg);
+    PERL_UNUSED_ARG(ppflags);
 
     POPBLOCK_normal(cx,newpm);
     assert(CxTYPE(cx) == CXt_GIVEN);
@@ -4135,7 +4165,7 @@ S_matcher_matches_sv(pTHX_ PMOP *matcher, SV *sv)
     PL_op = (OP *) matcher;
     XPUSHs(sv);
     PUTBACK;
-    pp_match(NULL, NULL);
+    pp_match(0, NULL);
     SPAGAIN;
     return (SvTRUEx(POPs));
 }
@@ -4155,7 +4185,8 @@ S_destroy_matcher(pTHX_ PMOP *matcher)
 /* Do a smart match */
 PP(pp_smartmatch)
 {
-    PERL_UNUSED_ARG(pparg1);
+    PERL_UNUSED_ARG(pparg);
+    PERL_UNUSED_ARG(ppflags);
     DEBUG_M(Perl_deb(aTHX_ "Starting smart match resolution\n"));
     return do_smartmatch(NULL, NULL);
 }
@@ -4163,7 +4194,7 @@ PP(pp_smartmatch)
 /* This version of do_smartmatch() implements the
  * table of smart matches that is found in perlsyn.
  */
-STATIC INSTRUCTION*
+STATIC int
 S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 {
     dVAR;
@@ -4618,9 +4649,9 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	PUSHs(d); PUSHs(e);
 	PUTBACK;
 	if (CopHINTS_get(PL_curcop) & HINT_INTEGER)
-	    pp_i_eq(NULL, NULL);
+	    pp_i_eq(0, NULL);
 	else
-	    pp_eq(NULL, NULL);
+	    pp_eq(0, NULL);
 	SPAGAIN;
 	if (SvTRUEx(POPs))
 	    RETPUSHYES;
@@ -4632,7 +4663,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
     DEBUG_M(Perl_deb(aTHX_ "    applying rule Any-Any\n"));
     PUSHs(d); PUSHs(e);
     PUTBACK;
-    pp_seq(NULL, NULL);
+    pp_seq(0, NULL);
     return NORMAL;
 }
 
@@ -4641,7 +4672,8 @@ PP(pp_enterwhen)
     dVAR; dSP;
     register PERL_CONTEXT *cx;
     const I32 gimme = GIMME_V;
-    const INSTRUCTION const * leave_instr = (const INSTRUCTION const*) pparg1;
+    const INSTRUCTION const * leave_instr = (const INSTRUCTION const*) pparg;
+    PERL_UNUSED_ARG(ppflags);
 
     /* This is essentially an optimization: if the match
        fails, we don't want to push a context and then
@@ -4669,7 +4701,8 @@ PP(pp_leavewhen)
     I32 gimme;
     SV **newsp;
     PMOP *newpm;
-    PERL_UNUSED_ARG(pparg1);
+    PERL_UNUSED_ARG(pparg);
+    PERL_UNUSED_ARG(ppflags);
 
     POPBLOCK_normal(cx,newpm);
     assert(CxTYPE(cx) == CXt_WHEN);
@@ -4689,7 +4722,8 @@ PP(pp_continue)
     I32 cxix;
     register PERL_CONTEXT *cx;
     I32 inner;
-    PERL_UNUSED_ARG(pparg1);
+    PERL_UNUSED_ARG(pparg);
+    PERL_UNUSED_ARG(ppflags);
     
     cxix = dopoptowhen(cxstack_ix); 
     if (cxix < 0)   
@@ -4713,7 +4747,8 @@ PP(pp_break)
     I32 cxix;
     register PERL_CONTEXT *cx;
     I32 inner;
-    PERL_UNUSED_ARG(pparg1);
+    PERL_UNUSED_ARG(pparg);
+    PERL_UNUSED_ARG(ppflags);
     
     cxix = dopoptogiven(cxstack_ix); 
     if (cxix < 0) {
