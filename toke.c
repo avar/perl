@@ -12746,6 +12746,9 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 	    else {
 		shift = 3;
 		s++;
+		/* Octal 0o666 syntax */
+		if (*s == 'o')
+			s++;
 	    }
 
 	    if (*s == '_') {
