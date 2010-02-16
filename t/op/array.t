@@ -7,7 +7,7 @@ BEGIN {
 
 require 'test.pl';
 
-plan (127);
+plan (128);
 
 #
 # @foo, @bar, and @ary are also used from tie-stdarray after tie-ing them
@@ -439,6 +439,11 @@ sub test_arylen {
  is(
   "@y", "1 2 3 4",
   'bug 70171 (self-assignment via my @x = @$x)'
+ );
+ my $z = get_z(); my $z = $$z; sub get_z { $z=join(" ", 1..4); return \$z };
+ is(
+  "$z", "1 2 3 4",
+  'bug 70171 (self-assignment via my $z = $$z) (extra, this was never actually broken)'
  );
 }
 
