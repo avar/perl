@@ -2894,6 +2894,9 @@ try_autoload:
 	dMARK;
 	register I32 items = SP - MARK;
 	AV* const padlist = CvPADLIST(cv);
+	if (!CvCODESEQ(cv)) {
+	    compile_cv(cv);
+	}
 	PUSHBLOCK(cx, CXt_SUB, MARK);
 	PUSHSUB(cx);
 	cx->blk_sub.ret_instr = run_get_next_instruction();
@@ -2956,10 +2959,6 @@ try_autoload:
 
 	PUTBACK;
 
-	if (!CvCODESEQ(cv)) {
-	    CvCODESEQ(cv) = new_codeseq();
-	    compile_op(CvROOT(cv), CvCODESEQ(cv));
-	}
 	RUN_SET_NEXT_INSTRUCTION(codeseq_start_instruction(CvCODESEQ(cv)));
 
 	return NORMAL;
