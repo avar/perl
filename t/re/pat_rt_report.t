@@ -21,7 +21,7 @@ BEGIN {
 }
 
 
-plan tests => 2511;  # Update this when adding/deleting tests.
+plan tests => 2513;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -540,6 +540,24 @@ sub run_tests {
         local $BugId = '25269';
         iseq "a-bc", eval {my ($x, $y) = "bca" =~ /^(?=.*(a)).*(bc)/; "$x-$y"},
              'Captures can move backwards in string';
+    }
+
+    {
+        use Encode;
+
+        my $line = "\xe2\x90\x0a";
+        chomp(my $str = $line);
+
+        Encode::_utf8_on($line);
+        Encode::_utf8_on($str);
+
+        $line =~ /(.*)/;
+        () = $line =~ /(.*)/;
+        ok 1 => "We didn't die with 'panic: pp_match start/end pointers' when matching \$line";
+
+        $str =~ /(.*)/;
+        () = $str =~ /(.*)/;
+        ok 1 => "We didn't die with 'panic: pp_match start/end pointers' when matching \$str";
     }
 
 
