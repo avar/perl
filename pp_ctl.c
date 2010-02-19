@@ -3778,7 +3778,7 @@ PP(pp_require)
     PL_op = NULL;
     if (doeval(gimme, NULL, NULL, PL_curcop->cop_seq)) {
 	CODESEQ* codeseq = new_codeseq();
-	save_freecodeseq(codeseq);
+	cx->blk_eval.codeseq = codeseq;
 	compile_op(PL_eval_root, codeseq);
 	DOCATCH(codeseq_start_instruction(codeseq));
     }
@@ -3899,7 +3899,7 @@ PP(pp_entereval)
 	    SAVEDELETE(PL_defstash, safestr, len);
 	}
 	codeseq = new_codeseq();
-	save_freecodeseq(codeseq);
+	cx->blk_eval.codeseq = codeseq;
 	compile_op(PL_eval_root, codeseq);
 	DOCATCH(codeseq_start_instruction(codeseq));
 	return NORMAL;
@@ -3932,8 +3932,6 @@ PP(pp_leaveeval)
     PERL_UNUSED_ARG(ppflags);
 
     POPBLOCK_normal(cx,newpm);
-    POPEVAL(cx);
-    ret_instr = cx->blk_eval.ret_instr;
 
     TAINT_NOT;
     if (gimme == G_VOID)
@@ -3962,6 +3960,9 @@ PP(pp_leaveeval)
 	}
     }
     PL_curpm = newpm;	/* Don't pop $1 et al till now */
+
+    POPEVAL(cx);
+    ret_instr = cx->blk_eval.ret_instr;
 
 #ifdef DEBUGGING
     assert(CvDEPTH(PL_compcv) == 1);
