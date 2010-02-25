@@ -77,10 +77,10 @@ sub do_test {
 	    print $pattern, "\n" if $DEBUG;
 	    my ($dump, $dump2) = split m/\*\*\*\*\*\n/, scalar <IN>;
 	    print $dump, "\n"    if $DEBUG;
-	    like( $dump, qr/\A$pattern\Z/ms );
+	    like( $dump, qr/\A$pattern\Z/ms, "pattern $_[0]");
 
             local $TODO = $repeat_todo;
-            is($dump2, $dump);
+            is($dump2, $dump, "repeat dump $_[0]");
 
 	    close(IN);
 
@@ -277,6 +277,7 @@ do_test(13,
     OWNER = $ADDR)?
     FLAGS = 0x404				# $] < 5.009
     FLAGS = 0x90				# $] >= 5.009
+    CODESEQ = 0x0				# $] >= 5.011
     OUTSIDE_SEQ = \\d+
     PADLIST = $ADDR
     PADNAME = $ADDR\\($ADDR\\) PAD = $ADDR\\($ADDR\\)
@@ -303,6 +304,7 @@ do_test(14,
 (?:    MUTEXP = $ADDR
     OWNER = $ADDR
 )?    FLAGS = 0x0
+    CODESEQ = $ADDR				# $] >= 5.011
     OUTSIDE_SEQ = \\d+
     PADLIST = $ADDR
     PADNAME = $ADDR\\($ADDR\\) PAD = $ADDR\\($ADDR\\)
@@ -591,6 +593,7 @@ do_test(23,
     OWNER = $ADDR)?
     FLAGS = 0x200				# $] < 5.009
     FLAGS = 0xc00				# $] >= 5.009
+    CODESEQ = 0x0				# $] >= 5.011
     OUTSIDE_SEQ = 0
     PADLIST = 0x0
     OUTSIDE = 0x0 \\(null\\)');	
@@ -653,6 +656,7 @@ do_test(26,
     MUTEXP = $ADDR
     OWNER = $ADDR
 )?    FLAGS = 0x0
+    CODESEQ = 0x0				# $] >= 5.011
     OUTSIDE_SEQ = \\d+
     LINES = 0
     PADLIST = $ADDR
