@@ -2954,6 +2954,7 @@ See cop.h: je_mustcatch, when set at any runlevel to TRUE, means eval ops must
 establish a local jmpenv to handle exception traps.
 
 =cut
+*/
 STATIC void
 S_docatch(pTHX_ const INSTRUCTION *instr)
 {
