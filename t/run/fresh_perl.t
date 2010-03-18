@@ -857,3 +857,8 @@ $@ =~ s/ at .*/ at/;
 print $@
 EXPECT
 Malformed UTF-8 character (unexpected end of string) in substitution (s///) at
+######## constant folded chr gets freed somewhere
+my %h = ( chr(65) => "OK\n" );
+print eval q[$h{chr(65)}];
+EXPECT
+OK

@@ -3991,11 +3991,10 @@ PP(pp_leaveeval)
 	(void)hv_delete(GvHVn(PL_incgv), SvPVX_const(nsv), SvCUR(nsv), G_DISCARD);
 	DIE(aTHX_ "%"SVf" did not return a true value", SVfARG(nsv));
     }
-    else {
-	LEAVE_with_name("eval");
-	if (!(save_flags & OPf_SPECIAL)) {
-	    CLEAR_ERRSV();
-	}
+
+    LEAVE_with_name("eval");
+    if (!(save_flags & OPf_SPECIAL)) {
+	CLEAR_ERRSV();
     }
 
     RUN_SET_NEXT_INSTRUCTION(ret_instr);
