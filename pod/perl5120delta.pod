@@ -2716,7 +2716,7 @@ Perl should now build on MirOS BSD.
 
 =over
 
-=item DomainOS
+=item Domain/OS
 
 =item MiNT
 
