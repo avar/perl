@@ -742,11 +742,14 @@ you should clone:
 
   % git clone git@github.com:USERNAME/perl.git perl-github
 
-The same patch as above, using github might look like this:
+The same patch as above, using GitHub might look like this. Here Git
+is set up so that L<git-pull(1)> will pull from perl5's master
+repository, but pushes will go to your GitHub branch.
 
   % cd perl-github
-  % git remote add upstream git://perl5.git.perl.org/perl.git
-  % git pull upstream blead
+  % git config remote.origin.pushurl $(git config remote.origin.url)
+  % git config remote.origin.url git://perl5.git.perl.org/perl.git
+  % git pull
   % git checkout -b orange
   % perl -pi -e 's{Leon Brocard}{Orange Brocard}' AUTHORS
   % git commit -a -m 'Rename Leon Brocard to Orange Brocard'
