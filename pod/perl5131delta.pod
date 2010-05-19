@@ -100,6 +100,17 @@ along the way.  But a C<$SIG{__WARN__}> handler will now receive an
 object-based warning as an object, where previously it was passed the
 result of stringifying the object.
 
+=head2 package block syntax
+
+The package statement can now declare blocks to be in a given
+package. With the new syntax C<package Foo { ... }> is equivalent to
+the previously supported C<{ package Foo; ... }> form. See
+L<perlfunc/"package NAMESPACE BLOCK"> for details.
+
+Perl's developers consider this feature to be experimental. We may
+remove it, amend it, or keep it as-is in Perl 5.16. Please submit
+feedback on this feature, e.g. via the L<perlthanks> tool.
+
 =head1 New Platforms
 
 XXX List any platforms that this version of perl compiles on, that previous
