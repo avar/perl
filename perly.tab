@@ -223,10 +223,10 @@ static const char *const yytname[] =
   "mexpr", "mnexpr", "miexpr", "label", "decl", "peg", "format",
   "formname", "mysubrout", "subrout", "startsub", "startanonsub",
   "startformsub", "subname", "proto", "subattrlist", "myattrlist",
-  "subbody", "package", "package_block", "@1", "use", "@2", "expr",
+  "subbody", "package", "package_block", "$@1", "use", "$@2", "expr",
   "argexpr", "listop", "@3", "method", "subscripted", "termbinop",
   "termunop", "anonymous", "termdo", "term", "myattrterm", "myterm",
-  "listexpr", "listexprcom", "lpar_or_qw", "@4", "my_scalar", "amper",
+  "listexpr", "listexprcom", "lpar_or_qw", "$@4", "my_scalar", "amper",
   "scalar", "ary", "hsh", "arylen", "star", "indirob", 0
 };
 #endif
