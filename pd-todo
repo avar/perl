@@ -1,0 +1,20 @@
+doc fix
+
+ae7a3cfa * [perl #47365] Docs for \$ prototypes
+
+regex fix:
+
+af9838cc * [perl #19078] wrong match order inside replacement
+
+c++ compat:
+
+95d2461a * Add two (SV *) casts to placate C++.
+
+more destruction:
+
+68b590d9 * call defout/stderr destructors last
+e4487e9b * run named IO destructors later
+
+some father fix:
+
+8e7d0c4b * [perl #77930] cx_stack reallocation during sort
