@@ -35,10 +35,13 @@ a C<"(?"> in a regular expression now means that the subexpression is to
 not inherit the surrounding modifiers such as C</i>, but to revert to the
 Perl defaults.  Any modifiers following the caret override the defaults.
 
-The stringification of regular expressions now uses this notation.  The
-main purpose of this is to allow tests that rely on the stringification
-to not have to change when new modifiers are added.  See
-L<perlre/Extended Patterns>.
+The stringification of regular expressions now uses this
+notation. E.g. before C<qr/hlagh/i> would be stringified as
+C<(?i-xsm:hlagh)>, but now it's stringified as C<(?^i:hlagh)>.
+
+The main purpose of this is to allow tests that rely on the
+stringification to not have to change when new modifiers are added.
+See L<perlre/Extended Patterns>.
 
 =head2 C<"d">, C<"l">, and C<"u"> regex modifiers added
 
