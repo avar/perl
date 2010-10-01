@@ -663,6 +663,11 @@ Perl now only frees the affected slots of the GV, rather than freeing
 the GV itself. This makes sure that there are no dangling refs or
 corrupted state during destruction.
 
+=item *
+
+Perl no longer leaks C<PL_main_cv> or C<PL_defstash> during
+destruction L<[perl #40388]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=40388>.
+
 =back
 
 =head1 Known Problems
