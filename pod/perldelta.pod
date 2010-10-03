@@ -317,6 +317,11 @@ section.
 
 =item *
 
+The documentation for C<wantarray> in L<perlfunc> (see
+L<perlfunc/wantarray>) now mentions the L<Want> CPAN module.
+
+=item *
+
 The documentation for the C<SvTRUE> macro was simply wrong in stating that
 get-magic is not processed. It has been corrected.
 

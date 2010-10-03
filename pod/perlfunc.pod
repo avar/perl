@@ -7650,7 +7650,7 @@ processes are being automatically reaped.  See L<perlipc> for details,
 and for other examples.
 
 =item wantarray
-X<wantarray> X<context>
+X<wantarray> X<context> X<Want>
 
 Returns true if the context of the currently executing subroutine or
 C<eval> is looking for a list value.  Returns false if the context is
@@ -7666,6 +7666,11 @@ in a C<BEGIN>, C<UNITCHECK>, C<CHECK>, C<INIT> or C<END> block, or
 in a C<DESTROY> method.
 
 This function should have been named wantlist() instead.
+
+If you need even more information about what your caller wants the
+L<Want> module (available on CPAN) might be able to help you. It can
+tell you if you're in lvalue context, what item count the caller is
+expecting and more.
 
 =item warn LIST
 X<warn> X<warning> X<STDERR>
