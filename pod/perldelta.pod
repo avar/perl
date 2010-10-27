@@ -65,6 +65,32 @@ See L<re/'/flags' mode> for details.
 Statement labels can now occur before any type of statement or declaration,
 such as C<package>.
 
+=head2 Array and hash container functions accept references
+
+All built-in functions that operate directly on array or hash
+containers to also accept references to arrays or hashes:
+
+  push $arrayref, @stuff;
+  unshift $arrayref, @stuff;
+  pop $arrayref;
+  shift $arrayref;
+  splice $arrayref, 0, 2;
+  keys $hashref;           # or $arrayref
+  values $hashref          # or $arrayref
+  ($k,$v) = each $hashref  # or $arrayref
+
+Calling C<keys> or C<values> directly on a reference gives a substantial
+performance improvement over explicit dereferencing.
+
+For C<keys>, C<values>, C<each>, when overloaded dereferencing is
+present, the overloaded dereference is used instead of dereferencing the
+underlying reftype.  Warnings are issued about assumptions made in the
+following three ambiguous cases:
+
+  (a) If both %{} and @{} overloading exists, %{} is used
+  (b) If %{} overloading exists on a blessed arrayref, %{} is used
+  (c) If @{} overloading exists on a blessed hashref, @{} is used
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
