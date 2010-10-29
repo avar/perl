@@ -70,11 +70,11 @@ foreach $line (@tests) {
     $y = [0,1,2,3,4,5,6,7];
     if (defined $len) {
 	@got = splice(@x, $pos, $len, @list);
-	@got2 = splice(@$y, $pos, $len, @list);
+	@got2 = splice($y, $pos, $len, @list);
     }
     else {
 	@got = splice(@x, $pos);
-	@got2 = splice(@$y, $pos);
+	@got2 = splice($y, $pos);
     }
     if (join(':',@got) eq join(':',@get) &&
 	join(':',@x) eq join(':',@leave)) {
