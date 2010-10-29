@@ -4655,7 +4655,7 @@ PP(pp_rkeys)
 	    SV *maybe_av = AMG_CALLun_var(sv,to_av_amg);
 	    if ( maybe_hv != sv && maybe_av != sv ) {
 		Perl_ck_warner(aTHX_ packWARN(WARN_AMBIGUOUS),
-		    Perl_form(aTHX_ "Ambiguous overloaded argument to %s resolved as %{}",
+		    Perl_form(aTHX_ "Ambiguous overloaded argument to %s resolved as %%{}",
 			PL_op_desc[PL_op->op_type]
 		    )
 		);
@@ -4676,7 +4676,7 @@ PP(pp_rkeys)
 		if ( SvTYPE(SvRV(sv)) == SVt_PVAV ) {
 		    /* %{} overload, but underlying reftype is AV */
 		    Perl_ck_warner(aTHX_ packWARN(WARN_AMBIGUOUS),
-			Perl_form(aTHX_ "Ambiguous overloaded argument to %s resolved as %{}",
+			Perl_form(aTHX_ "Ambiguous overloaded argument to %s resolved as %%{}",
 			    PL_op_desc[PL_op->op_type]
 			)
 		    );
@@ -4688,7 +4688,7 @@ PP(pp_rkeys)
     }
 
     if ( SvTYPE(sv) != SVt_PVHV && SvTYPE(sv) != SVt_PVAV ) {
-	DIE(Perl_form(aTHX_ "Type of argument to %s must be hashref or arrayref",
+	DIE(aTHX_ Perl_form(aTHX_ "Type of argument to %s must be hashref or arrayref",
 	    PL_op_desc[PL_op->op_type] ));
     }
 
