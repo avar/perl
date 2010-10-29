@@ -14,7 +14,7 @@
 -4,			4 5 6 7,	0 1 2 3
 EOF
 
-print "1..", 11 + 2*@tests, "\n";
+print "1..", 13 + 2*@tests, "\n";
 die "blech" unless @tests;
 
 @x = (1,2,3);
@@ -61,6 +61,30 @@ eval { push $hashref, 0, 1, 2, 3 };
 if ( $@ && $@ =~ /Not an ARRAY reference/ ) {print "ok 11\n"} else {print "not ok 11 # \$\@ = $@\n"}
 
 $test = 12;
+
+# test context
+{
+    my($first, $second) = ([1], [2]);
+    sub two_things { return +($first, $second) }
+    push two_things(), 3;
+    if (join(':',@$first) eq '1' &&
+        join(':',@$second) eq '2:3') {
+        print "ok ",$test++,"\n";
+    }
+    else {
+        print "not ok ",$test++," got: \$first = [ @$first ]; \$second = [ @$second ];\n";
+    }
+
+    push @{ two_things() }, 4;
+    if (join(':',@$first) eq '1' &&
+        join(':',@$second) eq '2:3:4') {
+        print "ok ",$test++,"\n";
+    }
+    else {
+        print "not ok ",$test++," got: \$first = [ @$first ]; \$second = [ @$second ];\n";
+    }
+}
+
 foreach $line (@tests) {
     ($list,$get,$leave) = split(/,\t*/,$line);
     ($pos, $len, @list) = split(' ',$list);
