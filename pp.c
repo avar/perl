@@ -4654,7 +4654,7 @@ PP(pp_rkeys)
 	    SV *maybe_hv = AMG_CALLun_var(sv,to_hv_amg);
 	    SV *maybe_av = AMG_CALLun_var(sv,to_av_amg);
 	    if ( maybe_hv != sv && maybe_av != sv ) {
-		Perl_ck_warner(aTHX_ packWARN(WARN_AMBIGUOUS),
+		Perl_ck_warner(aTHX_ packWARN(WARN_AMBIGUOUS), "%s",
 		    Perl_form(aTHX_ "Ambiguous overloaded argument to %s resolved as %%{}",
 			PL_op_desc[PL_op->op_type]
 		    )
@@ -4664,7 +4664,7 @@ PP(pp_rkeys)
 	    else if ( maybe_av != sv ) {
 		if ( SvTYPE(SvRV(sv)) == SVt_PVHV ) {
 		    /* @{} overload, but underlying reftype is HV */
-		    Perl_ck_warner(aTHX_ packWARN(WARN_AMBIGUOUS),
+		    Perl_ck_warner(aTHX_ packWARN(WARN_AMBIGUOUS), "%s",
 			Perl_form(aTHX_ "Ambiguous overloaded argument to %s resolved as @{}",
 			    PL_op_desc[PL_op->op_type]
 			)
@@ -4675,7 +4675,7 @@ PP(pp_rkeys)
 	    else if ( maybe_hv != sv ) {
 		if ( SvTYPE(SvRV(sv)) == SVt_PVAV ) {
 		    /* %{} overload, but underlying reftype is AV */
-		    Perl_ck_warner(aTHX_ packWARN(WARN_AMBIGUOUS),
+		    Perl_ck_warner(aTHX_ packWARN(WARN_AMBIGUOUS), "%s",
 			Perl_form(aTHX_ "Ambiguous overloaded argument to %s resolved as %%{}",
 			    PL_op_desc[PL_op->op_type]
 			)
