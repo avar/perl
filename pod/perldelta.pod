@@ -68,7 +68,7 @@ such as C<package>.
 =head2 Array and hash container functions accept references
 
 All built-in functions that operate directly on array or hash
-containers to also accept references to arrays or hashes:
+containers now also accept references to arrays or hashes:
 
   push $arrayref, @stuff;
   unshift $arrayref, @stuff;
