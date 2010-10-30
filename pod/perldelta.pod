@@ -70,14 +70,21 @@ such as C<package>.
 All built-in functions that operate directly on array or hash
 containers now also accept references to arrays or hashes:
 
-  push $arrayref, @stuff;
-  unshift $arrayref, @stuff;
-  pop $arrayref;
-  shift $arrayref;
-  splice $arrayref, 0, 2;
-  keys $hashref;           # or $arrayref
-  values $hashref          # or $arrayref
-  ($k,$v) = each $hashref  # or $arrayref
+  |----------------------------+---------------------------|
+  | Traditional syntax         | Terse syntax              |
+  |----------------------------+---------------------------|
+  | push @$arrayref, @stuff    | push $arrayref, @stuff    |
+  | unshift @$arrayref, @stuff | unshift $arrayref, @stuff |
+  | pop @$arrayref             | pop $arrayref             |
+  | shift @$arrayref           | shift $arrayref           |
+  | splice @$arrayref, 0, 2    | splice $arrayref, 0, 2    |
+  | keys %$hashref             | keys $hashref             |
+  | keys @$arrayref            | keys $arrayref            |
+  | values %$hashref           | values $hashref           |
+  | values @$arrayref          | values $arrayref          |
+  | ($k,$v) = each %$hashref   | ($k,$v) = each $hashref   |
+  | ($k,$v) = each @$arrayref  | ($k,$v) = each $arrayref  |
+  |----------------------------+---------------------------|
 
 Calling C<keys> or C<values> directly on a reference gives a substantial
 performance improvement over explicit dereferencing.
