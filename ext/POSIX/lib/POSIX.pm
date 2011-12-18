@@ -361,7 +361,7 @@ our %EXPORT_TAGS = (
 		tcflow tcflush tcgetattr tcsendbreak tcsetattr )],
 
     time_h =>	[qw(CLK_TCK CLOCKS_PER_SEC NULL asctime clock ctime
-		difftime mktime strftime tzset tzname)],
+		difftime mktime strftime strptime tzset tzname)],
 
     unistd_h =>	[qw(F_OK NULL R_OK SEEK_CUR SEEK_END SEEK_SET
 		STDERR_FILENO STDIN_FILENO STDOUT_FILENO W_OK X_OK
