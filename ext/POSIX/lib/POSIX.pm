@@ -387,12 +387,17 @@ our %EXPORT_TAGS = (
   # De-duplicate the export list: 
   my %export;
   @export{map {@$_} values %EXPORT_TAGS} = ();
+
+  # Symbols that should not be exported by default because they are recently
+  # added. It would upset too much of CPAN to export these by default
+  our @EXPORT_OK;
+  delete $export{$_} and push @EXPORT_OK, $_ for qw(strptime);
+
   # Doing the de-dup with a temporary hash has the advantage that the SVs in
   # @EXPORT are actually shared hash key scalars, which will save some memory.
   our @EXPORT = keys %export;
 
-  our @EXPORT_OK = (qw(close lchown nice open pipe read times write
-		       printf sprintf),
+  @EXPORT_OK = (qw(close lchown nice open pipe read times write printf sprintf),
 		    grep {!exists $export{$_}} keys %reimpl, keys %replacement);
 }
 
