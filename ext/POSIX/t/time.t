@@ -68,14 +68,14 @@ is(ord strftime($ss, POSIX::localtime(time)),
    223, 'Format string has correct character');
 unlike($ss, qr/\w/, 'Still not internally UTF-8 encoded');
 
-my @time = (POSIX::strptime("2011-12-18 12:34:56", "%Y-%m-%d %H:%M:%S"))[0..5];
-is_deeply(\@time, [56, 34, 12, 18, 12-1, 2011-1900], 'strptime() all 6 fields');
+my @time = POSIX::strptime("2011-12-18 12:34:56", "%Y-%m-%d %H:%M:%S");
+is_deeply(\@time, [56, 34, 12, 18, 12-1, 2011-1900, 0, 351, 0], 'strptime() all 6 fields');
 
-@time = (POSIX::strptime("2011-12-18", "%Y-%m-%d", 1, 23, 4))[0..5];
-is_deeply(\@time, [1, 23, 4, 18, 12-1, 2011-1900], 'strptime() all date fields with passed time');
+@time = POSIX::strptime("2011-12-18", "%Y-%m-%d", 1, 23, 4);
+is_deeply(\@time, [1, 23, 4, 18, 12-1, 2011-1900, 0, 351, 0], 'strptime() all date fields with passed time');
 
-@time = (POSIX::strptime("12:34:56", "%H:%M:%S", 1, 2, 3, 4, 5, 6))[0..5];
-is_deeply(\@time, [56, 34, 12, 4, 5, 6], 'strptime() all date fields with passed time');
+@time = POSIX::strptime("12:34:56", "%H:%M:%S", 1, 2, 3, 4, 5, 6);
+is_deeply(\@time, [56, 34, 12, 4, 5, 6, 1, 154, 0], 'strptime() all date fields with passed time');
 
 @time = POSIX::strptime("Foobar", "%H:%M:%S");
 is(scalar @time, 0, 'strptime() invalid input yields empty list');

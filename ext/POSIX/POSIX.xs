@@ -1859,6 +1859,8 @@ strptime(str, fmt, sec=-1, min=-1, hour=-1, mday=-1, mon=-1, year=-1, wday=-1, y
 		/* failed parse */
 		XSRETURN(0);
 
+	    mktime(&tm);
+
 	    EXTEND(SP, 9);
 	    PUSHs(sv_2mortal(newSViv(tm.tm_sec)));
 	    PUSHs(sv_2mortal(newSViv(tm.tm_min)));
