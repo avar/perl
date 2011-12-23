@@ -4,7 +4,7 @@ use strict;
 
 use Config;
 use POSIX;
-use Test::More tests => 27;
+use Test::More tests => 28;
 
 # go to UTC to avoid DST issues around the world when testing.  SUS3 says that
 # null should get you UTC, but some environments want the explicit names.
@@ -76,6 +76,9 @@ is_deeply(\@time, [1, 23, 4, 18, 12-1, 2011-1900, 0, 351, 0], 'strptime() all da
 
 @time = POSIX::strptime("12:34:56", "%H:%M:%S", 1, 2, 3, 4, 5, 6);
 is_deeply(\@time, [56, 34, 12, 4, 5, 6, 1, 154, 0], 'strptime() all date fields with passed time');
+
+@time = POSIX::strptime("July 4", "%b %d");
+is_deeply([@time[3,4]], [4, 7-1], 'strptime() partial yields correct mday/mon');
 
 @time = POSIX::strptime("Foobar", "%H:%M:%S");
 is(scalar @time, 0, 'strptime() invalid input yields empty list');
