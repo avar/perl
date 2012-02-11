@@ -30,5 +30,7 @@ my $ppid2 : shared = 0;
 
 new threads( sub { ($pid2, $ppid2) = ($$, getppid()); } ) -> join();
 
-is($pid,  $pid2,  'pids');
-is($ppid, $ppid2, 'ppids');
+# If this breaks you're either running under LinuxThreads or your
+# system doesn't have POSIX thread semantics.
+is($pid,  $pid2, 'getpid() in a thread is the same as in the parent');
+is($ppid, $ppid2, 'getppid() in a thread is the same as in the parent');
