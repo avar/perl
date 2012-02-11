@@ -1109,16 +1109,16 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	SvNOK_on(sv);	/* what a wonderful hack! */
 	break;
     case '<':
-	sv_setiv(sv, (IV)PL_uid);
+	sv_setiv(sv, (IV)PerlProc_getuid());
 	break;
     case '>':
-	sv_setiv(sv, (IV)PL_euid);
+	sv_setiv(sv, (IV)PerlProc_geteuid());
 	break;
     case '(':
-	sv_setiv(sv, (IV)PL_gid);
+	sv_setiv(sv, (IV)PerlProc_getgid());
 	goto add_groups;
     case ')':
-	sv_setiv(sv, (IV)PL_egid);
+	sv_setiv(sv, (IV)PerlProc_getegid());
       add_groups:
 #ifdef HAS_GETGROUPS
 	{
