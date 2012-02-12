@@ -3755,7 +3755,7 @@ S_validate_suid(pTHX_ PerlIO *rsfp)
     PERL_ARGS_ASSERT_VALIDATE_SUID;
 
     const UV  my_uid = PerlProc_getuid();
-    const UV my_euid = PerlProc_geteuid()
+    const UV my_euid = PerlProc_geteuid();
     const UV  my_gid = PerlProc_getgid();
     const UV my_egid = PerlProc_getegid();
 
