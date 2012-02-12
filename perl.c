@@ -4571,7 +4571,8 @@ S_mayberelocate(pTHX_ const char *const dir, STRLEN len, U32 flags)
 		    /* And this is the new libdir.  */
 		    libdir = tempsv;
 		    if (PL_tainting &&
-			(PL_uid != PL_euid || PL_gid != PL_egid)) {
+			(PerlProc_getuid() != PerlProc_geteuid() ||
+			 PerlProc_getgid() != PerlProc_getegid())) {
 			/* Need to taint relocated paths if running set ID  */
 			SvTAINTED_on(libdir);
 		    }
