@@ -2795,6 +2795,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	}
 	break;
     case '<':
+	{
 	const IV new_uid = SvIV(sv);
 	PL_delaymagic_uid = new_uid;
 	if (PL_delaymagic) {
@@ -2824,58 +2825,61 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 #endif
 #endif
 	break;
+	}
     case '>':
-	PL_euid = SvIV(sv);
+	{
+	const UV new_euid = SvIV(sv);
+	PL_delaymagic_euid = new_euid;
 	if (PL_delaymagic) {
 	    PL_delaymagic |= DM_EUID;
 	    break;				/* don't do magic till later */
 	}
 #ifdef HAS_SETEUID
-	(void)seteuid((Uid_t)PL_euid);
+	(void)seteuid((Uid_t)new_euid);
 #else
 #ifdef HAS_SETREUID
-	(void)setreuid((Uid_t)-1, (Uid_t)PL_euid);
+	(void)setreuid((Uid_t)-1, (Uid_t)new_euid);
 #else
 #ifdef HAS_SETRESUID
-	(void)setresuid((Uid_t)-1, (Uid_t)PL_euid, (Uid_t)-1);
+	(void)setresuid((Uid_t)-1, (Uid_t)new_euid, (Uid_t)-1);
 #else
-	if (PL_euid == PL_uid)		/* special case $> = $< */
-	    PerlProc_setuid(PL_euid);
+	if (new_euid == PerlProc_getuid())		/* special case $> = $< */
+	    PerlProc_setuid(my_euid);
 	else {
-	    PL_euid = PerlProc_geteuid();
 	    Perl_croak(aTHX_ "seteuid() not implemented");
 	}
 #endif
 #endif
 #endif
-	PL_euid = PerlProc_geteuid();
 	break;
+	}
     case '(':
-	PL_gid = SvIV(sv);
+	{
+	const UV new_gid = SvIV(sv);
+	PL_delaymagic_gid = new_gid;
 	if (PL_delaymagic) {
 	    PL_delaymagic |= DM_RGID;
 	    break;				/* don't do magic till later */
 	}
 #ifdef HAS_SETRGID
-	(void)setrgid((Gid_t)PL_gid);
+	(void)setrgid((Gid_t)new_gid);
 #else
 #ifdef HAS_SETREGID
-	(void)setregid((Gid_t)PL_gid, (Gid_t)-1);
+	(void)setregid((Gid_t)new_gid, (Gid_t)-1);
 #else
 #ifdef HAS_SETRESGID
-      (void)setresgid((Gid_t)PL_gid, (Gid_t)-1, (Gid_t) -1);
+      (void)setresgid((Gid_t)new_gid, (Gid_t)-1, (Gid_t) -1);
 #else
-	if (PL_gid == PL_egid)			/* special case $( = $) */
-	    (void)PerlProc_setgid(PL_gid);
+	if (new_gid == PerlProc_getegid())			/* special case $( = $) */
+	    (void)PerlProc_setgid(new_gid);
 	else {
-	    PL_gid = PerlProc_getgid();
 	    Perl_croak(aTHX_ "setrgid() not implemented");
 	}
 #endif
 #endif
 #endif
-	PL_gid = PerlProc_getgid();
 	break;
+	}
     case ')':
 #ifdef HAS_SETGROUPS
 	{
