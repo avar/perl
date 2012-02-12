@@ -2795,35 +2795,34 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	}
 	break;
     case '<':
-	PL_uid = SvIV(sv);
+	const IV new_uid = SvIV(sv);
+	PL_delaymagic_uid = new_uid;
 	if (PL_delaymagic) {
 	    PL_delaymagic |= DM_RUID;
 	    break;				/* don't do magic till later */
 	}
 #ifdef HAS_SETRUID
-	(void)setruid((Uid_t)PL_uid);
+	(void)setruid((Uid_t)new_uid);
 #else
 #ifdef HAS_SETREUID
-	(void)setreuid((Uid_t)PL_uid, (Uid_t)-1);
+	(void)setreuid((Uid_t)new_uid, (Uid_t)-1);
 #else
 #ifdef HAS_SETRESUID
-      (void)setresuid((Uid_t)PL_uid, (Uid_t)-1, (Uid_t)-1);
+      (void)setresuid((Uid_t)new_uid, (Uid_t)-1, (Uid_t)-1);
 #else
-	if (PL_uid == PL_euid) {		/* special case $< = $> */
+	if (new_uid == PerlProc_geteuid()) {		/* special case $< = $> */
 #ifdef PERL_DARWIN
 	    /* workaround for Darwin's setuid peculiarity, cf [perl #24122] */
-	    if (PL_uid != 0 && PerlProc_getuid() == 0)
+	    if (new_uid != 0 && PerlProc_getuid() == 0)
 		(void)PerlProc_setuid(0);
 #endif
-	    (void)PerlProc_setuid(PL_uid);
+	    (void)PerlProc_setuid(new_uid);
 	} else {
-	    PL_uid = PerlProc_getuid();
 	    Perl_croak(aTHX_ "setruid() not implemented");
 	}
 #endif
 #endif
 #endif
-	PL_uid = PerlProc_getuid();
 	break;
     case '>':
 	PL_euid = SvIV(sv);
