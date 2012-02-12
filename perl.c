@@ -1608,7 +1608,7 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
 	PL_origfilename = savepv(argv[0]);
 	PL_do_undump = FALSE;
 	cxstack_ix = -1;		/* start label stack again */
-	init_ids();
+	init_ids_taintaing();
 	assert (!PL_tainted);
 	TAINT;
 	S_set_caret_X(aTHX);
