@@ -3806,7 +3806,7 @@ S_find_beginning(pTHX_ SV* linestr_sv, PerlIO *rsfp)
 
 
 STATIC void
-S_init_id_tainting(pTHX)
+S_init_ids_tainting(pTHX)
 {
     dVAR;
     const UV my_uid = PerlProc_getuid();
