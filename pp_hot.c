@@ -1115,7 +1115,7 @@ PP(pp_aassign)
 	    }
 #    endif /* HAS_SETEUID */
 	    if (PL_delaymagic & DM_UID) {
-		if (PL_uid != PL_delaymagic_euid)
+		if (PL_delaymagic_uid != PL_delaymagic_euid)
 		    DIE(aTHX_ "No setreuid available");
 		(void)PerlProc_setuid(PL_delaymagic_uid);
 	    }
