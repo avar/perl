@@ -3754,13 +3754,18 @@ S_validate_suid(pTHX_ PerlIO *rsfp)
 {
     PERL_ARGS_ASSERT_VALIDATE_SUID;
 
-    if (PL_euid != PL_uid || PL_egid != PL_gid) {	/* (suidperl doesn't exist, in fact) */
+    const UV  my_uid = PerlProc_getuid();
+    const UV my_euid = PerlProc_geteuid()
+    const UV  my_gid = PerlProc_getgid();
+    const UV my_egid = PerlProc_getegid();
+
+    if (my_euid != my_uid || my_egid != my_gid) {	/* (suidperl doesn't exist, in fact) */
 	dVAR;
 
 	PerlLIO_fstat(PerlIO_fileno(rsfp),&PL_statbuf);	/* may be either wrapped or real suid */
-	if ((PL_euid != PL_uid && PL_euid == PL_statbuf.st_uid && PL_statbuf.st_mode & S_ISUID)
+	if ((my_euid != my_uid && my_euid == PL_statbuf.st_uid && PL_statbuf.st_mode & S_ISUID)
 	    ||
-	    (PL_egid != PL_gid && PL_egid == PL_statbuf.st_gid && PL_statbuf.st_mode & S_ISGID)
+	    (my_egid != my_gid && my_egid == PL_statbuf.st_gid && PL_statbuf.st_mode & S_ISGID)
 	   )
 	    if (!PL_do_undump)
 		Perl_croak(aTHX_ "YOU HAVEN'T DISABLED SET-ID SCRIPTS IN THE KERNEL YET!\n\
