@@ -57,7 +57,7 @@ Perl_taint_proper(pTHX_ const char *f, const char *const s)
 
 	if (!f)
 	    f = PL_no_security;
-	if (PL_euid != PL_uid)
+	if (PerlProc_getuid() != PerlProc_geteuid())
 	    ug = " while running setuid";
 	else if (PL_egid != PL_gid)
 	    ug = " while running setgid";
