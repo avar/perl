@@ -33,8 +33,8 @@ Perl_taint_proper(pTHX_ const char *f, const char *const s)
 
 #   if Uid_t_size == 1
     {
-	const UV  uid = PL_uid;
-	const UV euid = PL_euid;
+	const UV  uid = PerlProc_getuid();
+	const UV euid = PerlProc_geteuid();
 
 	DEBUG_u(PerlIO_printf(Perl_debug_log,
 			       "%s %d %"UVuf" %"UVuf"\n",
@@ -42,8 +42,8 @@ Perl_taint_proper(pTHX_ const char *f, const char *const s)
     }
 #   else
     {
-	const IV  uid = PL_uid;
-	const IV euid = PL_euid;
+	const IV  uid = PerlProc_getuid();
+	const IV euid = PerlProc_geteuid();
 
 	DEBUG_u(PerlIO_printf(Perl_debug_log,
 			       "%s %d %"IVdf" %"IVdf"\n",
