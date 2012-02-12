@@ -3809,10 +3809,10 @@ STATIC void
 S_init_id_tainting(pTHX)
 {
     dVAR;
-    my_uid = PerlProc_getuid();
-    my_euid = PerlProc_geteuid();
-    my_gid = PerlProc_getgid();
-    my_egid = PerlProc_getegid();
+    const UV my_uid = PerlProc_getuid();
+    const UV my_euid = PerlProc_geteuid();
+    const UV my_gid = PerlProc_getgid();
+    const UV my_egid = PerlProc_getegid();
 
     /* Should not happen: */
     CHECK_MALLOC_TAINT(my_uid && (my_euid != my_uid || my_egid != my_gid));
