@@ -2881,6 +2881,8 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	break;
 	}
     case ')':
+	{
+	UV new_egid;
 #ifdef HAS_SETGROUPS
 	{
 	    const char *p = SvPV_const(sv, len);
@@ -2896,7 +2898,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 
             while (isSPACE(*p))
                 ++p;
-            PL_egid = Atol(p);
+            new_egid = Atol(p);
             for (i = 0; i < maxgrp; ++i) {
                 while (*p && !isSPACE(*p))
                     ++p;
@@ -2915,32 +2917,32 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	    Safefree(gary);
 	}
 #else  /* HAS_SETGROUPS */
-	PL_egid = SvIV(sv);
+	new_egid = SvIV(sv);
 #endif /* HAS_SETGROUPS */
+	PL_delaymagic_egid = new_egid;
 	if (PL_delaymagic) {
 	    PL_delaymagic |= DM_EGID;
 	    break;				/* don't do magic till later */
 	}
 #ifdef HAS_SETEGID
-	(void)setegid((Gid_t)PL_egid);
+	(void)setegid((Gid_t)new_egid);
 #else
 #ifdef HAS_SETREGID
-	(void)setregid((Gid_t)-1, (Gid_t)PL_egid);
+	(void)setregid((Gid_t)-1, (Gid_t)new_egid);
 #else
 #ifdef HAS_SETRESGID
-	(void)setresgid((Gid_t)-1, (Gid_t)PL_egid, (Gid_t)-1);
+	(void)setresgid((Gid_t)-1, (Gid_t)new_egid, (Gid_t)-1);
 #else
-	if (PL_egid == PL_gid)			/* special case $) = $( */
-	    (void)PerlProc_setgid(PL_egid);
+	if (new_egid == PerlProc_getgid())			/* special case $) = $( */
+	    (void)PerlProc_setgid(new_egid);
 	else {
-	    PL_egid = PerlProc_getegid();
 	    Perl_croak(aTHX_ "setegid() not implemented");
 	}
 #endif
 #endif
 #endif
-	PL_egid = PerlProc_getegid();
 	break;
+	}
     case ':':
 	PL_chopset = SvPV_force(sv,len);
 	break;
