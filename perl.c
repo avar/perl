@@ -3882,9 +3882,9 @@ S_forbid_setid(pTHX_ const char flag, const bool suidscript) /* g */
     }
 
 #ifdef SETUID_SCRIPTS_ARE_SECURE_NOW
-    if (PL_euid != PL_uid)
+    if (PerlProc_getuid() != PerlProc_geteuid())
         Perl_croak(aTHX_ "No %s allowed while running setuid", message);
-    if (PL_egid != PL_gid)
+    if (PerlProc_getgid() != PerlProc_getegid())
         Perl_croak(aTHX_ "No %s allowed while running setgid", message);
 #endif /* SETUID_SCRIPTS_ARE_SECURE_NOW */
     if (suidscript)
