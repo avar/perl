@@ -3816,7 +3816,7 @@ S_init_id_tainting(pTHX)
 
     /* Should not happen: */
     CHECK_MALLOC_TAINT(my_uid && (my_euid != my_uid || my_egid != my_gid));
-    my_tainting |= (my_uid && (my_euid != my_uid || my_egid != my_gid));
+    PL_tainting |= (my_uid && (my_euid != my_uid || my_egid != my_gid));
     /* BUG */
     /* PSz 27 Feb 04
      * Should go by suidscript, not uid!=euid: why disallow
