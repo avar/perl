@@ -280,7 +280,7 @@ perl_construct(pTHXx)
 
     init_stacks();
 
-    init_ids();
+    init_ids_tainting();
 
     JMPENV_BOOTSTRAP;
     STATUS_ALL_SUCCESS;
@@ -3806,20 +3806,17 @@ S_find_beginning(pTHX_ SV* linestr_sv, PerlIO *rsfp)
 
 
 STATIC void
-S_init_ids(pTHX)
+S_init_id_tainting(pTHX)
 {
     dVAR;
-    PL_uid = PerlProc_getuid();
-    PL_euid = PerlProc_geteuid();
-    PL_gid = PerlProc_getgid();
-    PL_egid = PerlProc_getegid();
-#ifdef VMS
-    PL_uid |= PL_gid << 16;
-    PL_euid |= PL_egid << 16;
-#endif
+    my_uid = PerlProc_getuid();
+    my_euid = PerlProc_geteuid();
+    my_gid = PerlProc_getgid();
+    my_egid = PerlProc_getegid();
+
     /* Should not happen: */
-    CHECK_MALLOC_TAINT(PL_uid && (PL_euid != PL_uid || PL_egid != PL_gid));
-    PL_tainting |= (PL_uid && (PL_euid != PL_uid || PL_egid != PL_gid));
+    CHECK_MALLOC_TAINT(my_uid && (my_euid != my_uid || my_egid != my_gid));
+    my_tainting |= (my_uid && (my_euid != my_uid || my_egid != my_gid));
     /* BUG */
     /* PSz 27 Feb 04
      * Should go by suidscript, not uid!=euid: why disallow
