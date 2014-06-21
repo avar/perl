@@ -106,7 +106,7 @@ sub testwarn {
 	    vec($default, $i, 2) = 1;
 	}
 	$registered = $default;
-	vec($registered, $warnings::LAST_BIT/2, 2) = 1;
+	vec($registered, $warnings::LAST_BIT/2, 2) = 4;
     }
 
     # The repetition number must be set to the value of $BYTES in
@@ -114,10 +114,10 @@ sub testwarn {
     BEGIN { check_bits( ${^WARNING_BITS}, "\0" x 17, 'all bits off via "no warnings"' ) }
     testwarn("\0" x 17, 'no bits');
 
-    use warnings;
+    use warnings qw(all extra);
     BEGIN { check_bits( ${^WARNING_BITS}, $default,
-			'default bits on via "use warnings"' ); }
-    BEGIN { testwarn($default, 'all'); }
+			'default bits on via "use warnings qw(all extra)"' ); }
+    BEGIN { testwarn($default, 'all extra'); }
     # run-time :
     # the warning mask has been extended by warnings::register
     testwarn($registered, 'ahead of w::r');
