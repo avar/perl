@@ -1176,14 +1176,13 @@ sub unimport
     # append 'all' when implied (empty import list or after a lone "FATAL")
     push @_, 'all' if !@_ || @_==1 && $_[0] eq 'FATAL';
 
+    # Both 'no warnings' and 'no warnings qw/all/' disable 'extra'
+    # warnings
+    push @_, 'extra' unless grep { $_ eq 'extra' } @_;
+
     foreach my $word ( @_ ) {
 	if ($word eq 'FATAL') {
 	    next;
-	}
-	elsif ($word eq 'all') {
-	    # Both 'no warnings' and 'no warnings qw/all/' disable
-	    # 'extra' warnings
-	    push @_, 'extra';
 	}
 	elsif ($catmask = $Bits{$word}) {
 	    $mask &= ~($catmask | $DeadBits{$word} | $All);
