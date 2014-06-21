@@ -1379,6 +1379,7 @@ Perl_scalarvoid(pTHX_ OP *o)
     OP *kid;
     SV *useless_sv = NULL;
     const char* useless = NULL;
+    bool useless_is_grep = FALSE;
     SV* sv;
     U8 want;
 
@@ -1455,7 +1456,6 @@ Perl_scalarvoid(pTHX_ OP *o)
     case OP_ANONLIST:
     case OP_ANONHASH:
     case OP_SORT:
-    case OP_GREPWHILE:
     case OP_REVERSE:
     case OP_RANGE:
     case OP_FLIP:
@@ -1496,9 +1496,14 @@ Perl_scalarvoid(pTHX_ OP *o)
     case OP_RUNCV:
       func_ops:
 	if (!(o->op_private & (OPpLVAL_INTRO|OPpOUR_INTRO)))
+	    useless = OP_DESC(o);
+	break;
+    case OP_GREPWHILE:
+	if (!(o->op_private & (OPpLVAL_INTRO|OPpOUR_INTRO))) {
 	    /* Otherwise it's "Useless use of grep iterator" */
-	    useless = (o->op_type == OP_GREPWHILE) ? "grep"
-	                                           : OP_DESC(o);
+	    useless = "grep";
+	    useless_is_grep = TRUE;
+	}
 	break;
 
     case OP_SPLIT:
@@ -1702,7 +1707,7 @@ Perl_scalarvoid(pTHX_ OP *o)
                        SVfARG(sv_2mortal(useless_sv)));
     }
     else if (useless) {
-       Perl_ck_warner(aTHX_ packWARN(WARN_VOID),
+       Perl_ck_warner(aTHX_ packWARN(useless_is_grep ? WARN_VOID_GREP : WARN_VOID),
                       "Useless use of %s in void context",
                       useless);
     }
