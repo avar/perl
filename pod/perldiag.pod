@@ -6159,13 +6159,13 @@ exactly a given numer, there is no room left for a choice.
 
 =item Useless use of %s in void context
 
-(W void) You did something without a side effect in a context that does
-nothing with the return value, such as a statement that doesn't return a
-value from a block, or the left side of a scalar comma operator.  Very
-often this points not to stupidity on your part, but a failure of Perl
-to parse your program the way you thought it would.  For example, you'd
-get this if you mixed up your C precedence with Python precedence and
-said
+(W void, void_grep) You did something without a side effect in a
+context that does nothing with the return value, such as a statement
+that doesn't return a value from a block, or the left side of a scalar
+comma operator.  Very often this points not to stupidity on your part,
+but a failure of Perl to parse your program the way you thought it
+would.  For example, you'd get this if you mixed up your C precedence
+with Python precedence and said
 
     $one, $two = 1, 2;
 
