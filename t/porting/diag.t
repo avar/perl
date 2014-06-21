@@ -422,9 +422,10 @@ sub check_message {
             ? "severity is one of $severity for $key"
             : "severity is $severity for $key");
 
+	# XXX: FAIL
         is($entries{$key}{category}, $categories,
            ($categories ? "categories are [$categories]" : "no category")
-             . " for $key");
+             . " for <$key>");
       }
     } elsif ($partial) {
       # noop
